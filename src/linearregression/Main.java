@@ -1,39 +1,79 @@
 package linearregression;
 
+import org.math.plot.*;
+
+import java.io.FileInputStream;
+
+import javax.swing.JFrame;
+
 import org.la4j.LinearAlgebra;
 import org.la4j.inversion.MatrixInverter;
+import org.la4j.matrix.Matrices;
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic1DMatrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
+import org.la4j.vector.Vector;
+import org.la4j.vector.dense.BasicVector;
+import org.la4j.vector.dense.DenseVector;
 
 public class Main {
-	
-	public static void main(String args[])
-	{
-		Matrix a = new Basic2DMatrix(new double[][]{
-				  { 1.0, 2.0, 3.0 },
-				  { 4.0, 5.0, 6.0 },
-				  { 3.0, 8.0, 9.0 }
-				});
 
-				// This one uses 1D array as internal representation
-				Matrix b = new Basic1DMatrix(new double[][]{
-				  { 1.0, 2.0, 3.0 },
-				  { 4.0, 5.0, 6.0 },
-				  { 7.0, 8.0, 9.0 }
-	});
-				//System.out.println(a.multiply(b));
-				//a.transpose();
-				
+	public static void main(String args[]) throws Exception {
+		Matrix a = new Basic2DMatrix(new double[][] { { 1.0, 2.0, 3.0 },
+				{ 4.0, 5.0, 6.0 }, { 3.0, 8.0, 9.0 } });
 
+		// This one uses 1D array as internal representation
+		Matrix b = new Basic1DMatrix(new double[][] { { 1.0, 2.0, 3.0 },
+				{ 4.0, 5.0, 6.0 }, { 7.0, 8.0, 9.0 } });
+		// System.out.println(a.multiply(b));
+		// a.transpose();
 
-						// We will use Gauss-Jordan method for inverting
-						MatrixInverter inverter = a.withInverter(LinearAlgebra.GAUSS_JORDAN);
-						// The 'b' matrix will be dense
-						b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
-						System.out.println(b);
-						System.out.println(a.multiply(b));
-				
+		// We will use Gauss-Jordan method for inverting
+		MatrixInverter inverter = a.withInverter(LinearAlgebra.GAUSS_JORDAN);
+		// The 'b' matrix will be dense
+		b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
+		System.out.println(b);
+		System.out.println(a.multiply(b));
+
+		Matrix matrix = new Basic2DMatrix(
+				Matrices.asSymbolSeparatedSource(new FileInputStream(
+						"./data/ex1data1.txt")));
+		System.out.println(matrix);
+
+		Plot2DPanel plot = new Plot2DPanel();
+
+		Vector xcol = matrix.getColumn(0);
+		Vector ycol = matrix.getColumn(1);
+		double[] x = ((DenseVector) xcol).toArray();
+		double[] y = ((DenseVector) ycol).toArray();
+
+		// create your PlotPanel (you can use it as a JPanel)
+
+		// add a line plot to the PlotPanel
+		plot.addScatterPlot("my plot", x, y);
+		double[] thetaV = new double[] { 0, 2 };
+		double[][] xs = new double[][] {
+				{ 1, 1,  1 }, { 1, 15, 30 } };
+		
+		addLine(plot, xs, thetaV);
+
+		// put the PlotPanel in a JFrame, as a JPanel
+		JFrame frame = new JFrame("a plot panel");
+		frame.setSize(600, 600);
+		frame.setContentPane(plot);
+		frame.setVisible(true);
+
+	}
+
+	private static void addLine(Plot2DPanel plot, double[][] xs, double[] thetaV) {
+		DenseVector theta = new BasicVector(thetaV);
+		Basic2DMatrix lineX = new Basic2DMatrix(xs);
+		DenseVector lineY = (DenseVector) lineX.transpose().multiply(theta);
+		System.out.println(lineX.transpose().getColumn(1));
+		System.out.println(lineY);
+		plot.addLinePlot("line",
+				((DenseVector) lineX.transpose().getColumn(1)).toArray(),
+				lineY.toArray());
 	}
 
 }
