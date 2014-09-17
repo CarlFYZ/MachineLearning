@@ -32,13 +32,23 @@ public class Main {
 		MatrixInverter inverter = a.withInverter(LinearAlgebra.GAUSS_JORDAN);
 		// The 'b' matrix will be dense
 		b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
+		
+		Matrix aa = a.resize(3, 6);
+		Matrix bb = b.resize(3, 6);
+		bb.swapColumns(0,3);
+		
+		System.out.println(bb);
 		System.out.println(b);
 		System.out.println(a.multiply(b));
 
-		Matrix matrix = new Basic2DMatrix(
+		Basic2DMatrix matrix = new Basic2DMatrix(
 				Matrices.asSymbolSeparatedSource(new FileInputStream(
 						"./data/ex1data1.txt")));
-		System.out.println(matrix);
+		//System.out.println(matrix);
+		
+		//Matrix X = matrix.select(arg0, arg1)
+		
+		
 
 		Plot2DPanel plot = new Plot2DPanel();
 
