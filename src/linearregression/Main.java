@@ -33,9 +33,9 @@ public class Main {
 		// We will use Gauss-Jordan method for inverting
 		MatrixInverter inverter = a.withInverter(LinearAlgebra.GAUSS_JORDAN);
 		// The 'b' matrix will be dense
-		b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
+		//b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
 		
-		Matrix bb = concatenate(a, b, true);
+		Matrix bb = PlotUtil.concatenate(a, b, true);
 		System.out.println(a);
 		System.out.println(b);
 		System.out.println(bb);
@@ -75,81 +75,6 @@ public class Main {
 
 	}
 
-	protected static Matrix concatenate(Matrix a, Matrix b, boolean isHorizontal)
-	{
-
-
-		
-		
-		
-		if (isHorizontal)
-		{
-
-			int columnsA = a.columns();
-			int columnsB = b.columns();
-
-			double [][] squareMatrix =  new double[columnsA+columnsB][columnsA+columnsB] ;
-			for (int i = 0; i < columnsB; i++)
-			{
-				squareMatrix[i][columnsA + i] = 1; 
-			}
-			b = b.resizeColumns(columnsA + columnsB);
-			a = a.resizeColumns(columnsA + columnsB);
-			Basic2DMatrix basic2dMatrix = new Basic2DMatrix(squareMatrix);
-			System.out.println(basic2dMatrix);
-			Matrix c = b.multiply( basic2dMatrix).add(a);
-			return c;
-
-		} 
-		else
-		{
-			int rowsA = a.rows();
-			int rowsB = b.rows();
-			a = a.resizeRows(rowsA + rowsB);
-			b = b.resizeRows(rowsA + rowsB);
-			for (int i = 0; i < rowsB; i++)
-			{
-				b.swapRows(rowsB - 1 - i, i + rowsA + rowsB - 1 - i);
-			}
-			return a.add( b );
-		}
-		
-	}
-	
-	protected static Matrix concatenateSlow(Matrix a, Matrix b, boolean isHorizontal)
-	{
-
-
-		
-		
-		
-		if (isHorizontal)
-		{
-
-			int columnsA = a.columns();
-			int columnsB = b.columns();
-			a = a.resizeColumns(columnsA + columnsB);
-			b = b.resizeColumns(columnsA + columnsB);
-			for (int i = 0; i < columnsB; i++)
-			{
-				b.swapColumns(columnsB - 1 - i, columnsA + columnsB - 1 - i);
-			}
-			return a.add( b );
-		} 
-		else
-		{
-			int rowsA = a.rows();
-			int rowsB = b.rows();
-			a = a.resizeRows(rowsA + rowsB);
-			b = b.resizeRows(rowsA + rowsB);
-			for (int i = 0; i < rowsB; i++)
-			{
-				b.swapRows(rowsB - 1 - i, i + rowsA + rowsB - 1 - i);
-			}
-			return a.add( b );
-		}
-		
-	}
 
 
 
