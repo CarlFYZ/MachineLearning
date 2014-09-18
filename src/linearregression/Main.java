@@ -33,12 +33,13 @@ public class Main {
 		// We will use Gauss-Jordan method for inverting
 		MatrixInverter inverter = a.withInverter(LinearAlgebra.GAUSS_JORDAN);
 		// The 'b' matrix will be dense
-		//b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
+		b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
 		
 		Matrix bb = PlotUtil.concatenate(a, b, true);
 		System.out.println(a);
 		System.out.println(b);
 		System.out.println(bb);
+		
 		
 		System.out.println(a.multiply(b));
 
