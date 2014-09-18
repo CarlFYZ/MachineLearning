@@ -15,6 +15,8 @@ import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 import org.la4j.vector.dense.DenseVector;
+import util.PlotUtil;
+
 
 public class Main {
 
@@ -33,12 +35,11 @@ public class Main {
 		// The 'b' matrix will be dense
 		b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
 		
-		Matrix aa = a.resize(3, 6);
-		Matrix bb = b.resize(3, 6);
-		bb.swapColumns(0,3);
-		
-		System.out.println(bb);
+		Matrix bb = concatenate(a, b, true);
+		System.out.println(a);
 		System.out.println(b);
+		System.out.println(bb);
+		
 		System.out.println(a.multiply(b));
 
 		Basic2DMatrix matrix = new Basic2DMatrix(
@@ -62,28 +63,94 @@ public class Main {
 		// add a line plot to the PlotPanel
 		plot.addScatterPlot("my plot", x, y);
 		double[] thetaV = new double[] { 0, 2 };
-		double[][] xs = new double[][] {
-				{ 1, 1,  1 }, { 1, 15, 30 } };
+		double[][] xs = new double[][] { { 1, 1,  1 }, { 1, 15, 30 } };
 		
-		addLine(plot, xs, thetaV);
+		PlotUtil.addLine(plot, "line", xs, thetaV);
 
 		// put the PlotPanel in a JFrame, as a JPanel
-		JFrame frame = new JFrame("a plot panel");
-		frame.setSize(600, 600);
-		frame.setContentPane(plot);
-		frame.setVisible(true);
+//		JFrame frame = new JFrame("a plot panel");
+//		frame.setSize(600, 600);
+//		frame.setContentPane(plot);
+//		frame.setVisible(true);
 
 	}
 
-	private static void addLine(Plot2DPanel plot, double[][] xs, double[] thetaV) {
-		DenseVector theta = new BasicVector(thetaV);
-		Basic2DMatrix lineX = new Basic2DMatrix(xs);
-		DenseVector lineY = (DenseVector) lineX.transpose().multiply(theta);
-		System.out.println(lineX.transpose().getColumn(1));
-		System.out.println(lineY);
-		plot.addLinePlot("line",
-				((DenseVector) lineX.transpose().getColumn(1)).toArray(),
-				lineY.toArray());
+	protected static Matrix concatenate(Matrix a, Matrix b, boolean isHorizontal)
+	{
+
+
+		
+		
+		
+		if (isHorizontal)
+		{
+
+			int columnsA = a.columns();
+			int columnsB = b.columns();
+
+			double [][] squareMatrix =  new double[columnsA+columnsB][columnsA+columnsB] ;
+			for (int i = 0; i < columnsB; i++)
+			{
+				squareMatrix[i][columnsA + i] = 1; 
+			}
+			b = b.resizeColumns(columnsA + columnsB);
+			a = a.resizeColumns(columnsA + columnsB);
+			Basic2DMatrix basic2dMatrix = new Basic2DMatrix(squareMatrix);
+			System.out.println(basic2dMatrix);
+			Matrix c = b.multiply( basic2dMatrix).add(a);
+			return c;
+
+		} 
+		else
+		{
+			int rowsA = a.rows();
+			int rowsB = b.rows();
+			a = a.resizeRows(rowsA + rowsB);
+			b = b.resizeRows(rowsA + rowsB);
+			for (int i = 0; i < rowsB; i++)
+			{
+				b.swapRows(rowsB - 1 - i, i + rowsA + rowsB - 1 - i);
+			}
+			return a.add( b );
+		}
+		
 	}
+	
+	protected static Matrix concatenateSlow(Matrix a, Matrix b, boolean isHorizontal)
+	{
+
+
+		
+		
+		
+		if (isHorizontal)
+		{
+
+			int columnsA = a.columns();
+			int columnsB = b.columns();
+			a = a.resizeColumns(columnsA + columnsB);
+			b = b.resizeColumns(columnsA + columnsB);
+			for (int i = 0; i < columnsB; i++)
+			{
+				b.swapColumns(columnsB - 1 - i, columnsA + columnsB - 1 - i);
+			}
+			return a.add( b );
+		} 
+		else
+		{
+			int rowsA = a.rows();
+			int rowsB = b.rows();
+			a = a.resizeRows(rowsA + rowsB);
+			b = b.resizeRows(rowsA + rowsB);
+			for (int i = 0; i < rowsB; i++)
+			{
+				b.swapRows(rowsB - 1 - i, i + rowsA + rowsB - 1 - i);
+			}
+			return a.add( b );
+		}
+		
+	}
+
+
 
 }
