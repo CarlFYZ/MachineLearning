@@ -56,23 +56,24 @@ public class Main {
 
 		Vector xcol = matrix.getColumn(0);
 		Vector ycol = matrix.getColumn(1);
-		double[] x = ((DenseVector) xcol).toArray();
+		Matrix x1Matrix = ((DenseVector) xcol).toColumnMatrix();
+		
 		double[] y = ((DenseVector) ycol).toArray();
 
 		// create your PlotPanel (you can use it as a JPanel)
 
 		// add a line plot to the PlotPanel
-		plot.addScatterPlot("my plot", x, y);
+		plot.addScatterPlot("my plot", matrix.toArray());
 		double[] thetaV = new double[] { 0, 2 };
 		double[][] xs = new double[][] { { 1, 1,  1 }, { 1, 15, 30 } };
 		
 		PlotUtil.addLine(plot, "line", xs, thetaV);
 
 		// put the PlotPanel in a JFrame, as a JPanel
-//		JFrame frame = new JFrame("a plot panel");
-//		frame.setSize(600, 600);
-//		frame.setContentPane(plot);
-//		frame.setVisible(true);
+		JFrame frame = new JFrame("a plot panel");
+		frame.setSize(600, 600);
+		frame.setContentPane(plot);
+		frame.setVisible(true);
 
 	}
 
