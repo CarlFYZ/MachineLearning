@@ -48,16 +48,16 @@ public class Main {
 		Vector theta = new BasicVector(thetaArray);
 		
 		// a
-		double a = 1;
+		double a = 0.02;
 		
 		///////////////////////////////////
 		
-		
-		theta = theta - a * 1 * /m * 
-				
-				X.multiply(theta).subtract(y).m
+		for (int i = 0; i< 1000;i ++)
+		{
+		theta = theta.subtract( X.transpose().multiply( (X.multiply(theta).subtract(y))).multiply(a/m));
 		
 		cost(m, y, X, theta);
+		}
 		
 		
 		
@@ -67,7 +67,7 @@ public class Main {
 		
 		double[][] xs = new double[][] { { 1, 1,  1 }, { 1, 15, 30 } };
 		
-		PlotUtil.addLine(plot, "line", xs, thetaArray);
+		PlotUtil.addLine(plot, "line", xs, theta);
 
 		// put the PlotPanel in a JFrame, as a JPanel
 		JFrame frame = new JFrame("a plot panel");
@@ -81,6 +81,7 @@ public class Main {
 		// Cost function 
 		Vector temp1 = X.multiply(theta).subtract(y);
 		double J = temp1.toRowMatrix().multiply(temp1).sum() * 1 /m;
+		System.out.println(J);
 	}
 
 
