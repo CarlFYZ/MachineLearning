@@ -15,59 +15,59 @@ import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 import org.la4j.vector.dense.DenseVector;
+
 import util.PlotUtil;
+import util.la.MatrixUtil;
 
 
 public class Main {
 
 	public static void main(String args[]) throws Exception {
-		Matrix a = new Basic2DMatrix(new double[][] { { 1.0, 2.0, 3.0 },
-				{ 4.0, 5.0, 6.0 }, { 3.0, 8.0, 9.0 } });
-
-		// This one uses 1D array as internal representation
-		Matrix b = new Basic1DMatrix(new double[][] { { 1.0, 2.0, 3.0 },
-				{ 4.0, 5.0, 6.0 }, { 7.0, 8.0, 9.0 } });
-		// System.out.println(a.multiply(b));
-		// a.transpose();
-
-		// We will use Gauss-Jordan method for inverting
-		MatrixInverter inverter = a.withInverter(LinearAlgebra.GAUSS_JORDAN);
-		// The 'b' matrix will be dense
-		b = inverter.inverse(LinearAlgebra.DENSE_FACTORY);
 		
-		Matrix bb = PlotUtil.concatenate(a, b, true);
-		System.out.println(a);
-		System.out.println(b);
-		System.out.println(bb);
-		
-		
-		System.out.println(a.multiply(b));
 
 		Basic2DMatrix matrix = new Basic2DMatrix(
 				Matrices.asSymbolSeparatedSource(new FileInputStream(
 						"./data/ex1data1.txt")));
-		//System.out.println(matrix);
-		
-		//Matrix X = matrix.select(arg0, arg1)
-		
-		
 
-		Plot2DPanel plot = new Plot2DPanel();
 
+		///////////////////////////////////
 		Vector xcol = matrix.getColumn(0);
-		Vector ycol = matrix.getColumn(1);
 		Matrix x1Matrix = ((DenseVector) xcol).toColumnMatrix();
+		// m
+		int m = xcol.length();
 		
-		double[] y = ((DenseVector) ycol).toArray();
+		// Y
+		Vector y = matrix.getColumn(1);
+		double[] yArray = ((DenseVector) y).toArray();
 
-		// create your PlotPanel (you can use it as a JPanel)
-
+		// X with 1 as first column
+		Matrix  X = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1), x1Matrix);
+		
+		// Theta
+		double[] thetaArray = new double[] { 0, 2 };
+		Vector theta = new BasicVector(thetaArray);
+		
+		// a
+		double a = 1;
+		
+		///////////////////////////////////
+		
+		
+		theta = theta - a * 1 * /m * 
+				
+				X.multiply(theta).subtract(y).m
+		
+		cost(m, y, X, theta);
+		
+		
+		
 		// add a line plot to the PlotPanel
+		Plot2DPanel plot = new Plot2DPanel();
 		plot.addScatterPlot("my plot", matrix.toArray());
-		double[] thetaV = new double[] { 0, 2 };
+		
 		double[][] xs = new double[][] { { 1, 1,  1 }, { 1, 15, 30 } };
 		
-		PlotUtil.addLine(plot, "line", xs, thetaV);
+		PlotUtil.addLine(plot, "line", xs, thetaArray);
 
 		// put the PlotPanel in a JFrame, as a JPanel
 		JFrame frame = new JFrame("a plot panel");
@@ -75,6 +75,12 @@ public class Main {
 		frame.setContentPane(plot);
 		frame.setVisible(true);
 
+	}
+
+	private static void cost(int m, Vector y, Matrix X, Vector theta) {
+		// Cost function 
+		Vector temp1 = X.multiply(theta).subtract(y);
+		double J = temp1.toRowMatrix().multiply(temp1).sum() * 1 /m;
 	}
 
 
