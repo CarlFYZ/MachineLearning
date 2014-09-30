@@ -41,7 +41,7 @@ public class Main {
 		double[] yArray = ((DenseVector) y).toArray();
 
 		// X with 1 as first column
-		Matrix  X = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1), x1Matrix);
+		Matrix  X = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1), x1Matrix, true);
 		
 		// Theta
 		double[] thetaArray = new double[] { 0, 2 };

@@ -39,19 +39,54 @@ public class MatrixUtil
 	}
 	
 
-	public static Matrix concatenate(Vector a, Matrix b )
+	public static Matrix concatenate(Vector a, Matrix b, boolean isHorizontal )
 	{
-		return concatenate(a.toColumnMatrix(), b, true); 
+		if (isHorizontal)
+		{
+			return concatenate(a.toColumnMatrix(), b, isHorizontal); 
+		}
+		else
+		{
+			return concatenate(a.toRowMatrix(), b, isHorizontal); 
+		}
+		
 	}
 	
-	public static Matrix concatenate(Vector a, Vector b )
+	public static Matrix concatenate(Vector a, Vector b, boolean isHorizontal  )
 	{
-		return concatenate(a.toColumnMatrix(), b.toColumnMatrix(), true); 
+		if (isHorizontal)
+		{
+			return concatenate(a.toColumnMatrix(), b.toColumnMatrix(), isHorizontal); 
+		}
+		else
+		{
+			return concatenate(a.toRowMatrix(), b.toRowMatrix(), isHorizontal); 
+		}
 	}
 	
-	public static Matrix concatenate(Matrix a, Vector b )
+	public static Matrix concatenate(Matrix a, Vector b, boolean isHorizontal )
 	{
-		return concatenate(a, b.toColumnMatrix(), true); 
+		if (isHorizontal)
+		{
+			return concatenate(a, b.toColumnMatrix(), isHorizontal);
+		}
+		else
+		{
+			return concatenate(a, b.toRowMatrix(), isHorizontal); 
+		}
+	}
+	
+	public static Matrix select(Matrix a, Vector b, double value, boolean isHorizontal)
+	{
+		Matrix result = null;
+		for (int i = 0; i< b.length(); i++)
+		{
+			if (b.get(i)== value)
+			{
+				result = MatrixUtil.concatenate(result, a.getRow(i) , isHorizontal);
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -62,7 +97,15 @@ public class MatrixUtil
 	 */
 	public static Matrix concatenate(Matrix a, Matrix b, boolean isHorizontal)
 	{
-		
+		if (a == null) 
+		{
+			return b;
+		} 
+		else if (b == null) 
+		{
+			return a;
+		}
+			
 		if (isHorizontal)
 		{
 			int columnsA = a.columns();

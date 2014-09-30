@@ -2,6 +2,7 @@ package logesticregression;
 
 import org.math.plot.*;
 
+import java.awt.Color;
 import java.io.FileInputStream;
 
 import javax.swing.JFrame;
@@ -65,8 +66,15 @@ public class Main {
 		
 		// add a line plot to the PlotPanel
 		Plot2DPanel plot = new Plot2DPanel();
-		plot.addScatterPlot("my plot", ((Basic2DMatrix)matrix.resizeColumns(2)).toArray());
-
+		//plot.addScatterPlot("my plot", ((Basic2DMatrix)matrix.resizeColumns(2)).toArray());
+		
+		Matrix ones = MatrixUtil.select(matrix.resizeColumns(2), matrix.getColumn(2), 1, false);
+		
+		Matrix zeros = MatrixUtil.select(matrix.resizeColumns(2), matrix.getColumn(2), 0, false);
+		
+		plot.addScatterPlot("my plot", Color.RED, ((Basic2DMatrix)ones).toArray());
+		
+		plot.addScatterPlot("my plot", Color.blue, ((Basic2DMatrix)zeros).toArray());
 		
 //		double[][] xs = new double[][] { { 1, 1,  1 }, { 1, 15, 30 } };
 //		
