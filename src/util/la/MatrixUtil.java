@@ -91,7 +91,7 @@ public class MatrixUtil
 		{
 			for (int j=0; j<dots[i].length; j++)
 			{
-				dots[i][j] = (startAndEnd[1][j] - startAndEnd[0][j]) * Math.random();
+				dots[i][j] = startAndEnd[0][j] + (startAndEnd[1][j] - startAndEnd[0][j]) * Math.random();
 			}
 			
 		}
@@ -181,7 +181,7 @@ public class MatrixUtil
 			}
 			if ( comp.compare( b.get(i), value) == selector )
 			{
-				System.out.println("+++" + a.getRow(i));
+				//System.out.println("+++" + a.getRow(i));
 				result = MatrixUtil.concatenate(result, a.getRow(i) , isHorizontal);
 			}
 			else
