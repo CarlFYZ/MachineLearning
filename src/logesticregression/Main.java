@@ -124,6 +124,7 @@ public class Main {
 		//Matrix sampleZeros = MatrixUtil.select(samples, sampleY, cp, 0, -1, false);
 		
 		plot.addScatterPlot("my plot", Color.BLACK, ((Basic2DMatrix)sampleOnes).toArray());
+		
 		//plot.addScatterPlot("my plot", Color.GREEN, ((Basic2DMatrix)sampleZeros).toArray());
 		
 //		double[][] xs = new double[][] { { 1, 1,  1 }, { 1, 15, 30 } };
