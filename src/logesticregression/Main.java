@@ -44,7 +44,7 @@ public class Main {
 				return (value -50)/70;
 			}
 		});
-		// m: number of features
+		// m: number of samples
 		int m = xMatrix.rows();
 		
 		// Y

@@ -116,7 +116,29 @@ public class MatrixUtil
 		return dots;
 	}
 	
-	
+	public static Matrix addBias(Matrix matrix, boolean addColumn) 
+	{
+		// Number of samples
+		if (addColumn)
+		{
+		int m = matrix.rows();
+
+		// add 1 to the fist column
+		Matrix result = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1), matrix, addColumn);
+
+		return result;
+		}
+		else
+		{
+			int m = matrix.columns();
+
+			// add 1 to the fist column
+			Matrix result = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1).toRowMatrix(), matrix, addColumn);
+
+			return result;
+		}
+	}
+
 
 	public static Matrix concatenate(Vector a, Matrix b, boolean isHorizontal )
 	{
