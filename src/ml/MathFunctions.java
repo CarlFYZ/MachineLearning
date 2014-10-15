@@ -20,6 +20,23 @@ public class MathFunctions {
 				
 		return v;
 	}
+	
+	
+	public static Matrix log(Matrix v)
+	{
+		v = v.transform(new MatrixFunction()
+		{
+			
+			@Override
+			public double evaluate(int arg0, int arg1, double arg2)
+			{
+				// TODO Auto-generated method stub
+				return Math.log(arg2);
+			}
+		});
+				
+		return v;
+	}
 
 	public static double sigmoid(double z)
 	{

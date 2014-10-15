@@ -116,6 +116,40 @@ public class MatrixUtil
 		return dots;
 	}
 	
+	
+	public static Matrix initialMatrix(int rows, int cols, double value)
+	{
+		double [][] matrix2d= new double[rows][cols];
+		if (value != 0)
+		{
+			for (int i =0; i<rows; i++)
+			{
+				for (int j= 0; j<cols; j++)
+				{
+					matrix2d[i][j] = value;
+				}
+			}
+				
+		}
+		
+		return new Basic2DMatrix(matrix2d);
+	}
+	
+	public static Matrix initialDiagonalMatrix(int size, double value)
+	{
+		double [][] matrix2d= new double[size][size];
+		if (value != 0)
+		{
+			for (int i =0; i<size; i++)
+			{
+					matrix2d[i][i] = value;
+			}
+				
+		}
+		
+		return  new Basic2DMatrix(matrix2d);
+	}
+	
 	public static Matrix addBias(Matrix matrix, boolean addColumn) 
 	{
 		// Number of samples
@@ -138,7 +172,6 @@ public class MatrixUtil
 			return result;
 		}
 	}
-
 
 	public static Matrix concatenate(Vector a, Matrix b, boolean isHorizontal )
 	{
