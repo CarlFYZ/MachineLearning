@@ -1,6 +1,5 @@
 package neuralnetwork;
 
-import static org.math.array.DoubleArray.increment;
 
 import javax.swing.JFrame;
 
@@ -8,8 +7,8 @@ import ml.MathFunctions;
 
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
+import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
-import org.math.plot.Plot3DPanel;
 
 import util.la.MatrixUtil;
 
@@ -91,8 +90,49 @@ public class MainComplete
 		//X.resize(arg0, arg1, arg2)
 		
 		// sigmoid gradient(derivative)
+		Matrix theta1Derivative = MatrixUtil.initialMatrix(25, 401, 0);
+		Matrix theta2Derivative = MatrixUtil.initialMatrix(10, 26, 0);
+		for (int i=0; i<5000;i++)
+		{
+		Result result = processOneSample(theta1, theta2, X.getRow(i),Y.toColumnVector());
+		theta1Derivative = theta1Derivative.add(result.One_Theta1_25_401);
+		theta2Derivative = theta2Derivative.add(result.One_Theta2_10_26);
+		}
+		theta1Derivative = theta1Derivative.divide(m);
+		theta2Derivative = theta2Derivative.divide(m);
+		
 		
 		System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15, -100)));
+	}
+	
+	
+	public static class Result{
+		Matrix One_Theta2_10_26;
+		
+		Matrix One_Theta1_25_401;
+	}
+	public static Result processOneSample(Matrix theta1, Matrix theta2, Vector a1, Vector Y)
+	{
+		Vector z2_25 = theta1.multiply(a1);
+		Vector a2_26 = MatrixUtil.addBias(MathFunctions.sigmoid(z2_25));
+		Vector z3_10 = theta2.multiply((a2_26));
+		Vector A3_10 = MathFunctions.sigmoid(z3_10);
+		System.out.println(A3_10);
+		
+		// 3
+		Vector delta3_10 = A3_10.subtract(Y);
+		
+		Vector delta2_26 = theta2.transpose().multiply(delta3_10).hadamardProduct(MatrixUtil.addBias(MathFunctions.sigmoidDerivative(z2_25)));
+		
+		// 4
+		Result result = new MainComplete.Result();
+		result.One_Theta2_10_26 = delta3_10.toColumnMatrix().multiply(a2_26.toRowMatrix());
+		
+		result.One_Theta1_25_401 = delta2_26.select(new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25})
+				.toColumnMatrix().multiply(a1.toRowMatrix());
+		return result;
+		
+		
 	}
 
 	protected static void showSamples(Basic2DMatrix xMatrix) throws InterruptedException

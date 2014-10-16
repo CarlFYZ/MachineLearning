@@ -77,6 +77,33 @@ public class MathFunctions {
 		});
 	}
 	
+	public static Vector sigmoid(Vector x)
+	{
+		return x.transform(new VectorFunction() 
+		{
+			
+			@Override
+			public double evaluate(int arg0, double value)
+			{
+				return sigmoid(value);
+			}
+		});
+	}
+	
+	
+	public static Vector sigmoidDerivative(Vector X)
+	{
+		return X.transform(new VectorFunction() {
+			
+			@Override
+			public double evaluate(int arg0, double value)
+			{
+				double g = sigmoid(value);
+				return g*(1-g);
+			}
+
+		});
+	}
 	public static Matrix sigmoidDerivative(Matrix X)
 	{
 		return X.transform(new MatrixFunction() {

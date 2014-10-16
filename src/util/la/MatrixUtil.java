@@ -1,6 +1,5 @@
 package util.la;
 
-import java.lang.reflect.Array;
 import java.util.Comparator;
 
 import org.la4j.LinearAlgebra;
@@ -185,6 +184,16 @@ public class MatrixUtil
 
 			return result;
 		}
+	}
+	
+	public static Vector addBias(Vector vector) 
+	{
+			Matrix matrix = vector.toColumnMatrix();
+			// add 1 to the fist column
+			Matrix result = MatrixUtil.concatenate(MatrixUtil.createVector(1, 1).toRowMatrix(), matrix, false);
+
+			return result.toColumnVector();
+
 	}
 
 	public static Matrix concatenate(Vector a, Matrix b, boolean isHorizontal )
