@@ -89,6 +89,10 @@ public class MainComplete
 		
 		System.out.println(J);
 		//X.resize(arg0, arg1, arg2)
+		
+		// sigmoid gradient(derivative)
+		
+		System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15, -100)));
 	}
 
 	protected static void showSamples(Basic2DMatrix xMatrix) throws InterruptedException

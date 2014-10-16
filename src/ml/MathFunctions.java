@@ -76,5 +76,18 @@ public class MathFunctions {
 			}
 		});
 	}
+	
+	public static Matrix sigmoidDerivative(Matrix X)
+	{
+		return X.transform(new MatrixFunction() {
+			
+			@Override
+			public double evaluate(int arg0, int arg1, double arg2) 
+			{
+				double g = sigmoid(arg2);
+				return g*(1-g);
+			}
+		});
+	}
 
 }

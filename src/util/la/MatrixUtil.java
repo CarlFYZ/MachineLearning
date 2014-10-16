@@ -116,6 +116,20 @@ public class MatrixUtil
 		return dots;
 	}
 	
+	public static Matrix initialRandomMatrix(int rows, int cols, double epsilon)
+	{
+		double[][] matrix2d = new double[rows][cols];
+
+		for (int i = 0; i < rows; i++) 
+		{
+			for (int j = 0; j < cols; j++) 
+			{
+				matrix2d[i][j] = Math.random() * 2* epsilon - epsilon;
+			}
+		}
+
+		return new Basic2DMatrix(matrix2d);
+	}
 	
 	public static Matrix initialMatrix(int rows, int cols, double value)
 	{
