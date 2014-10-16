@@ -89,6 +89,8 @@ public class MainComplete
 		System.out.println(J);
 		//X.resize(arg0, arg1, arg2)
 		
+		for (int o = 0;  o<10;o++)
+		{
 		// sigmoid gradient(derivative)
 		Matrix theta1Derivative = MatrixUtil.initialMatrix(25, 401, 0);
 		Matrix theta2Derivative = MatrixUtil.initialMatrix(10, 26, 0);
@@ -98,11 +100,27 @@ public class MainComplete
 		theta1Derivative = theta1Derivative.add(result.One_Theta1_25_401);
 		theta2Derivative = theta2Derivative.add(result.One_Theta2_10_26);
 		}
-		theta1Derivative = theta1Derivative.divide(m);
-		theta2Derivative = theta2Derivative.divide(m);
+		theta1Derivative = theta1Derivative.divide(10000*m);
+		theta2Derivative = theta2Derivative.divide(10000*m);
+		theta1 = (Basic2DMatrix)theta1.subtract( theta1Derivative);
+		theta2 = (Basic2DMatrix)theta2.subtract(theta2Derivative);
 		
+		theta1a = theta1.multiply(trans400);
+		theta2a = theta2.multiply(trans25);
 		
-		System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15, -100)));
+		fo1 = (zero10_5000.subtract(Y)).hadamardProduct(MathFunctions.log(A));
+		fo2 = (one10_5000.subtract(Y)).hadamardProduct(MathFunctions.log(one10_5000.subtract(A)));
+		// Cost
+		J = fo1.subtract(fo2).sum()/m;
+		J = J + ( theta1a.hadamardProduct(theta1a).sum() + theta2a.hadamardProduct(theta2a).sum() 
+				//- theta1.getColumn(0).hadamardProduct(theta1.getColumn(0)).sum()
+				//- theta2.getColumn(0).hadamardProduct(theta2.getColumn(0)).sum()
+				)/(2*m);
+		
+		System.out.println(J);
+		}
+		
+		//System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15, -100)));
 	}
 	
 	
@@ -117,7 +135,7 @@ public class MainComplete
 		Vector a2_26 = MatrixUtil.addBias(MathFunctions.sigmoid(z2_25));
 		Vector z3_10 = theta2.multiply((a2_26));
 		Vector A3_10 = MathFunctions.sigmoid(z3_10);
-		System.out.println(A3_10);
+		//System.out.println(A3_10);
 		
 		// 3
 		Vector delta3_10 = A3_10.subtract(Y);
