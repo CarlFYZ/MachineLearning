@@ -115,7 +115,7 @@ public class MatrixUtil
 		return dots;
 	}
 	
-	public static Matrix initialRandomMatrix(int rows, int cols, double epsilon)
+	public static Basic2DMatrix initialRandomMatrix(int rows, int cols, double epsilon)
 	{
 		double[][] matrix2d = new double[rows][cols];
 
