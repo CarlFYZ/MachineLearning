@@ -1,6 +1,7 @@
 package neuralnetwork;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 
 import javax.swing.JPanel;
@@ -26,7 +27,7 @@ public class MainFrame extends JPanel
 		{
 			for (int j = 0; j < 20; j++)
 			{
-				System.out.print(">" + (int) (z[i][j] * 100) + 100);
+				// System.out.print(">" + (int) (z[i][j] * 100) + 100);
 				g.setColor(new Color(0, (int) (z[i][j] * 100) + 100, 0));
 				g.drawLine(i, j, i, j);
 
@@ -35,7 +36,10 @@ public class MainFrame extends JPanel
 		
 	}
 
-
+	public Dimension getPreferredSize() {
+        return new Dimension(100, 100);
+    }
+	
 
 
 }

@@ -1,11 +1,18 @@
 package neuralnetwork;
 
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import ml.MathFunctions;
 
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
+import org.la4j.matrix.functor.MatrixFunction;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 
@@ -16,6 +23,11 @@ import com.jmatio.types.MLDouble;
 
 public class MainComplete
 {
+	
+	
+	public static Basic2DMatrix theta1result;
+	public static  Basic2DMatrix theta2result;
+	
 	public static void main(String[] args) throws Exception
 	{
 		MatFileReader matfilereader = new MatFileReader("./data/ex4weights.mat");
@@ -31,14 +43,15 @@ public class MainComplete
 		System.out.println("theta1:" + theta1ml);
 		System.out.println("theta2:" + theta2ml);
 
-		// theta1 = MatrixUtil.initialRandomMatrix(25, 401, 0.12);
+		theta1 = MatrixUtil.initialRandomMatrix(25, 401, 0.12);
+		theta2 = MatrixUtil.initialRandomMatrix(10, 26, 0.12);
 		MatFileReader matfilereader2 = new MatFileReader("./data/ex4data1.mat");
 		MLDouble Xml = (MLDouble) matfilereader2.getMLArray("X");
 
 		// X
 		Basic2DMatrix xMatrix = new Basic2DMatrix(Xml.getArray());
 		System.out.println("X:" + Xml);
-		// showSamples(xMatrix);
+		System.out.println(xMatrix.getRow(1));
 
 		// number of samples
 		int m = xMatrix.rows();
@@ -94,7 +107,7 @@ public class MainComplete
 		// System.out.println(J);
 		// X.resize(arg0, arg1, arg2)
 
-		for (int o = 0; o < 100; o++)
+		for (int o = 0; o < 2; o++)
 		{
 			// sigmoid gradient(derivative)
 			Matrix cumulativeTheta1Derivative = MatrixUtil.initialMatrix(25, 401, 0);
@@ -108,35 +121,85 @@ public class MainComplete
 			Matrix theta1Derivative = cumulativeTheta1Derivative.divide(m);
 			Matrix theta2Derivative = cumulativeTheta2Derivative.divide(m);
 
+			MatrixFunction matrixFunctionClearColumn0 = new MatrixFunction()
+			{
+				
+				@Override
+				public double evaluate(int arg0, int arg1, double arg2)
+				{
+					// TODO Auto-generated method stub
+					if (arg1 ==0)
+					{
+						return 0;
+					}
+					return arg2;
+				}
+			};
+			Matrix theta1RegDerivative = theta1.multiply(lambda/m).transform(matrixFunctionClearColumn0);
+			
+			Matrix theta2RegDerivative = theta2.multiply(lambda/m).transform(matrixFunctionClearColumn0);
+			
+			
 			// System.out.println(theta1Derivative);
-			theta1 = (Basic2DMatrix) theta1.subtract(theta1Derivative.multiply(alpha));
-			theta2 = (Basic2DMatrix) theta2.subtract(theta2Derivative.multiply(alpha));
+			theta1 = (Basic2DMatrix) theta1.subtract(theta1Derivative.multiply(alpha).add( theta1RegDerivative.multiply(alpha)));
+			theta2 = (Basic2DMatrix) theta2.subtract(theta2Derivative.multiply(alpha).add( theta2RegDerivative.multiply(alpha)));
 
-			double J = calculateCost(theta1, theta2, m, X, Y, zero10_5000, one10_5000, trans400, trans25, false);
+//			theta1 = (Basic2DMatrix)theta1.subtract(theta1RegDerivative);
+//			theta2 = (Basic2DMatrix)theta2.subtract(theta2RegDerivative);
+			
+			
+			double J = calculateCost(theta1, theta2, m, X, Y, zero10_5000, one10_5000, trans400, trans25, true);
 
 			// ////////////////////////// verify gradient
-			double epsilon = 0.0001;
-			Basic2DMatrix[][] testThetas = new Basic2DMatrix[2][2];
-
-			Matrix epsilonMatirx = MatrixUtil.initialMatrix(theta1.rows(), theta1.columns(), 0);
-			epsilonMatirx.set(3, 3, epsilon);
-			testThetas[0][0] = (Basic2DMatrix) theta1.subtract(epsilonMatirx);
-			testThetas[0][1] = (Basic2DMatrix) theta1.add(epsilonMatirx);
-
-			// Cost 1
-			Matrix A1 = MathFunctions.sigmoid(theta2.multiply(MatrixUtil.addBias(MathFunctions.sigmoid(testThetas[0][0].multiply(X.transpose())), false)));
-			double J1 = calculateCost(testThetas[0][0], theta2, X.rows(), X, Y, zero10_5000, one10_5000, trans400, trans25, false);
-			// Cost 2
-			Matrix A2 = MathFunctions.sigmoid(theta2.multiply(MatrixUtil.addBias(MathFunctions.sigmoid(testThetas[0][1].multiply(X.transpose())), false)));
-			double J2 = calculateCost(testThetas[0][1], theta2, X.rows(), X, Y, zero10_5000, one10_5000, trans400, trans25, false);
-			System.out.println((J2 - J1) / (2 * epsilon));
-			System.out.println(theta1Derivative.get(3, 3));
+//			double epsilon = 0.0001;
+//			Basic2DMatrix[][] testThetas = new Basic2DMatrix[2][2];
+//
+//			Matrix epsilonMatirx = MatrixUtil.initialMatrix(theta1.rows(), theta1.columns(), 0);
+//			epsilonMatirx.set(3, 3, epsilon);
+//			testThetas[0][0] = (Basic2DMatrix) theta1.subtract(epsilonMatirx);
+//			testThetas[0][1] = (Basic2DMatrix) theta1.add(epsilonMatirx);
+//
+//			// Cost 1
+//			Matrix A1 = MathFunctions.sigmoid(theta2.multiply(MatrixUtil.addBias(MathFunctions.sigmoid(testThetas[0][0].multiply(X.transpose())), false)));
+//			double J1 = calculateCost(testThetas[0][0], theta2, X.rows(), X, Y, zero10_5000, one10_5000, trans400, trans25, false);
+//			// Cost 2
+//			Matrix A2 = MathFunctions.sigmoid(theta2.multiply(MatrixUtil.addBias(MathFunctions.sigmoid(testThetas[0][1].multiply(X.transpose())), false)));
+//			double J2 = calculateCost(testThetas[0][1], theta2, X.rows(), X, Y, zero10_5000, one10_5000, trans400, trans25, false);
+//			System.out.println((J2 - J1) / (2 * epsilon));
+//			System.out.println(theta1Derivative.get(3, 3));
 
 			System.out.println(J);
+			
+			System.out.println("Result -----------------------------");
+			Matrix predict = MathFunctions.sigmoid(theta2.multiply(MatrixUtil.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
+			//System.out.println(predict.rows() + " " + predict.columns());
+			int correctCount = 0;
+			for(int n=0;n<5000;n++)
+			{
+				Vector onePredict = predict.getColumn(n);
+				int highest =0;
+				for (int p=1;p<10;p++)
+				{
+					if(onePredict.get(highest) < onePredict.get(p))
+					{
+						highest = p;
+					}
+					
+				}
+				if (highest==y.get(n)-1)
+				{
+					correctCount++;
+				}
+			}
+			System.out.println(correctCount);
 		}
 
 		// System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15,
 		// -100)));
+		theta1result = theta1;
+		theta2result = theta2;
+		
+		showSamples(xMatrix);
 	}
 
 	private static double calculateCost(Basic2DMatrix theta1, Basic2DMatrix theta2, int m, Matrix X, Matrix Y, Matrix zero10_5000, Matrix one10_5000, Matrix trans400, Matrix trans25,
@@ -185,18 +248,58 @@ public class MainComplete
 
 		result.One_Theta1_25_401 = delta2_26.select(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 }).toColumnMatrix()
 				.multiply(a1.toRowMatrix());
+		
+		
 		return result;
 
 	}
 
-	protected static void showSamples(Basic2DMatrix xMatrix) throws InterruptedException
+	protected static void showSamples(Basic2DMatrix xMatrix ) throws InterruptedException
 	{
 		// define your data
 		JFrame f = new JFrame();
-		MainFrame panel = new MainFrame();
-		f.add("Center", panel);
-		f.setSize(100, 100);
+		
+		f.setLayout(new FlowLayout());
+		MainFrame panel = new MainFrame();	
+		final PaintPanel pdraw = new PaintPanel();
+		
+		f.add( panel);
+		f.add( pdraw);
+
+		JButton button = new JButton("Calculate");
+		f.add(button);
+		//
+		button.addActionListener(new ActionListener()
+		{
+			 
+            public void actionPerformed(ActionEvent e)
+            {
+                //Execute when button is pressed
+                System.out.println("You clicked the button");
+                pdraw.clear();
+                double [] a = pdraw.input;
+                
+                Vector predict = MathFunctions.sigmoid(
+                		theta2result.multiply(MatrixUtil.addBias(
+                				MathFunctions.sigmoid(theta1result.multiply(MatrixUtil.addBias(new BasicVector(a)))))));
+                System.out.println(predict);
+                int highest=0;
+                for (int p=1;p<10;p++)
+				{
+					if(predict.get(highest) < predict.get(p))
+					{
+						highest = p;
+					}
+					
+				}
+                System.out.println("Your input is " + (highest +1) %10);
+                
+            }
+        });      
+		
+		f.setSize(120, 240);
 		f.show();
+		
 		for (int k = 0; k < 50; k++)
 		{
 			double[] z = ((BasicVector) (xMatrix.getRow(k * 100))).toArray();
@@ -212,5 +315,17 @@ public class MainComplete
 			Thread.sleep(50);
 			f.repaint();
 		}
+		
+		
+		
+		
+		
+		
+		
+		
+
 	}
+	
+	
+	
 }
