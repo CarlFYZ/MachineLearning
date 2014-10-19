@@ -70,16 +70,7 @@ public class MainComplete
 		}
 		Matrix Y = new Basic2DMatrix(Ys);
 
-
-
-		// Cost function
-		Matrix zero10_5000 = MatrixFunctions.createMatrix(10, 5000, 0);
-		Matrix one10_5000 = MatrixFunctions.createMatrix(10, 5000, 1);
-
-		// Regularized cost
-
-		Matrix trans400 = MatrixFunctions.concatenate(MatrixFunctions.createVector(400, 0).toRowMatrix(), MatrixFunctions.createDiagonalMatrix(400, 1), false);
-		Matrix trans25 = MatrixFunctions.concatenate(MatrixFunctions.createVector(25, 0).toRowMatrix(), MatrixFunctions.createDiagonalMatrix(25, 1), false);
+		//double J = calculateCost( new Matrix[] {theta1, theta2}, m, X, Y,  true);
 
 
 		for (int o = 0; o < 3; o++)
@@ -120,7 +111,10 @@ public class MainComplete
 			theta1 = (Basic2DMatrix) theta1.subtract(theta1Derivative.multiply(alpha).add( theta1RegDerivative.multiply(alpha)));
 			theta2 = (Basic2DMatrix) theta2.subtract(theta2Derivative.multiply(alpha).add( theta2RegDerivative.multiply(alpha)));
 
-			double J = calculateCost(theta1, theta2, m, X, Y, zero10_5000, one10_5000, trans400, trans25, true);
+
+
+			
+			double J = calculateCost(new Matrix[] {theta1, theta2}, m, X, Y,  true);
 
 			// ////////////////////////// verify gradient
 //			double epsilon = 0.0001;
@@ -176,22 +170,59 @@ public class MainComplete
 		showSamples(xMatrix);
 	}
 
-	private static double calculateCost(Basic2DMatrix theta1, Basic2DMatrix theta2, int m, Matrix X, Matrix Y, Matrix zero10_5000, Matrix one10_5000, Matrix trans400, Matrix trans25,
-			boolean isRegularize)
+	private static double calculateCost(Matrix thetas[], int m, Matrix X, Matrix Y,	boolean isRegularize)
 	{
-		Matrix A;
-		A = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
+		
 
-		Matrix theta1a = theta1.multiply(trans400);
-		Matrix theta2a = theta2.multiply(trans25);
 
-		Matrix fo1 = (zero10_5000.subtract(Y)).hadamardProduct(MathFunctions.log(A));
-		Matrix fo2 = (one10_5000.subtract(Y)).hadamardProduct(MathFunctions.log(one10_5000.subtract(A)));
+//
+//		// Regularized cost
+//
+//		Matrix trans400 = MatrixFunctions.concatenate(MatrixFunctions.createVector(400, 0).toRowMatrix(), MatrixFunctions.createDiagonalMatrix(400, 1), false);
+//		Matrix trans25 = MatrixFunctions.concatenate(MatrixFunctions.createVector(25, 0).toRowMatrix(), MatrixFunctions.createDiagonalMatrix(25, 1), false);
+
+		
+		
+		
+		Matrix A = X.transpose();
+		for (int i = 0; i<thetas.length; i++)
+		{
+			A = MathFunctions.sigmoid(thetas[i].multiply(A));
+			if (i<thetas.length-1)
+			{
+				A = MatrixFunctions.addBias(A,false);
+			}
+		}
+			
+		
+		//A = MathFunctions.sigmoid(thetas[1].multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(thetas[0].multiply(X.transpose())), false)));
+		//System.out.println(A.subtract(a).sum());
+		
+		Matrix[] thetasReg = new Matrix[thetas.length];
+		
+		for (int i = 0;i<thetas.length;i++)
+		{
+//		Matrix theta1a = //theta1.multiply(trans400);
+//		 thetas[0].sliceBottomRight(0, 1);
+		thetasReg[i] = thetas[i].sliceBottomRight(0, 1);
+		//System.out.println(theta1a.rows() + "/" + theta1a.columns());
+//		Matrix theta2a = //theta2.multiply(trans25);
+//		thetas[1].sliceBottomRight(0,1);
+		//System.out.println(theta2a.rows() + "/" +  theta2a.columns());
+		}
+		Matrix fo1 = (Y.multiply(-1)).hadamardProduct(MathFunctions.log(A));
+		Matrix fo2 = (MatrixFunctions.subtract(1,Y)).hadamardProduct(MathFunctions.log(MatrixFunctions.subtract(1,A)));
 		// Cost
 		double J = fo1.subtract(fo2).sum() / m;
 		if (isRegularize)
 		{
-			J = J + (theta1a.hadamardProduct(theta1a).sum() + theta2a.hadamardProduct(theta2a).sum()) / (2 * m);
+			double sumRegularized = 0;
+			for (int i = 0;i<thetas.length;i++)
+			{
+				sumRegularized = sumRegularized + thetasReg[i].hadamardProduct(thetasReg[i]).sum();
+			}
+			J = J + sumRegularized / (2 * m);
+			//J = J + (theta1a.hadamardProduct(theta1a).sum() + theta2a.hadamardProduct(theta2a).sum()) / (2 * m);
 		}
 		return J;
 	}

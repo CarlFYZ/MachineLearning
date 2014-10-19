@@ -38,6 +38,19 @@ public class MatrixFunctions
 		return new BasicVector(firstColumn);
 	}
 	
+	/**
+	 * Subtract scalar by matrix
+	 * @param v
+	 * @param matrix
+	 * @return
+	 */
+	public static Matrix subtract(double v, Matrix matrix)
+	{
+		
+		return matrix.subtract(v).multiply(-1);
+	}
+	
+	
 	
 	/**
 	 * Create a vector will all same values
