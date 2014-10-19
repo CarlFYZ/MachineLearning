@@ -70,52 +70,30 @@ public class MainComplete
 		}
 		Matrix Y = new Basic2DMatrix(Ys);
 
-		// System.out.println(y);
-		// System.out.println(Y);
 
-		// Forward propagation
-		Matrix A = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
-
-		// System.out.println(A.rows() + "x" + A.columns());
-		// System.out.println(A.resize(2, 1000));
 
 		// Cost function
 		Matrix zero10_5000 = MatrixFunctions.createMatrix(10, 5000, 0);
 		Matrix one10_5000 = MatrixFunctions.createMatrix(10, 5000, 1);
-
-		// Matrix fo1 =
-		// (zero10_5000.subtract(Y)).hadamardProduct(MathFunctions.log(A));
-		// Matrix fo2 =
-		// (one10_5000.subtract(Y)).hadamardProduct(MathFunctions.log(one10_5000.subtract(A)));
-		// // Cost
-		// double J = fo1.subtract(fo2).sum()/m;
 
 		// Regularized cost
 
 		Matrix trans400 = MatrixFunctions.concatenate(MatrixFunctions.createVector(400, 0).toRowMatrix(), MatrixFunctions.createDiagonalMatrix(400, 1), false);
 		Matrix trans25 = MatrixFunctions.concatenate(MatrixFunctions.createVector(25, 0).toRowMatrix(), MatrixFunctions.createDiagonalMatrix(25, 1), false);
 
-		// Matrix theta1a = theta1.multiply(trans400);
-		// Matrix theta2a = theta2.multiply(trans25);
-		// // J = J + ( theta1a.hadamardProduct(theta1a).sum() +
-		// theta2a.hadamardProduct(theta2a).sum()
-		// // //- theta1.getColumn(0).hadamardProduct(theta1.getColumn(0)).sum()
-		// // //- theta2.getColumn(0).hadamardProduct(theta2.getColumn(0)).sum()
-		// // )/(2*m);
 
-		// System.out.println(J);
-		// X.resize(arg0, arg1, arg2)
-
-		for (int o = 0; o < 400; o++)
+		for (int o = 0; o < 3; o++)
 		{
 			// sigmoid gradient(derivative)
 			Matrix cumulativeTheta1Derivative = MatrixFunctions.createMatrix(25, 401, 0);
 			Matrix cumulativeTheta2Derivative = MatrixFunctions.createMatrix(10, 26, 0);
 			for (int i = 0; i < 5000; i++)
 			{
-				Result result = processOneSample(theta1, theta2, X.getRow(i), Y.getColumn(i));
-				cumulativeTheta1Derivative = cumulativeTheta1Derivative.add(result.One_Theta1_25_401);
-				cumulativeTheta2Derivative = cumulativeTheta2Derivative.add(result.One_Theta2_10_26);
+				Matrix[] result = processOneSample(new Matrix[] {theta1, theta2},X.getRow(i), Y.getColumn(i));
+//				cumulativeTheta1Derivative = cumulativeTheta1Derivative.add(result.One_Theta1_25_401);
+//				cumulativeTheta2Derivative = cumulativeTheta2Derivative.add(result.One_Theta2_10_26);
+				cumulativeTheta1Derivative = cumulativeTheta1Derivative.add(result[0]);
+				cumulativeTheta2Derivative = cumulativeTheta2Derivative.add(result[1]);
 			}
 			Matrix theta1Derivative = cumulativeTheta1Derivative.divide(m);
 			Matrix theta2Derivative = cumulativeTheta2Derivative.divide(m);
@@ -143,10 +121,6 @@ public class MainComplete
 			theta1 = (Basic2DMatrix) theta1.subtract(theta1Derivative.multiply(alpha).add( theta1RegDerivative.multiply(alpha)));
 			theta2 = (Basic2DMatrix) theta2.subtract(theta2Derivative.multiply(alpha).add( theta2RegDerivative.multiply(alpha)));
 
-//			theta1 = (Basic2DMatrix)theta1.subtract(theta1RegDerivative);
-//			theta2 = (Basic2DMatrix)theta2.subtract(theta2RegDerivative);
-			
-			
 			double J = calculateCost(theta1, theta2, m, X, Y, zero10_5000, one10_5000, trans400, trans25, true);
 
 			// ////////////////////////// verify gradient
@@ -230,28 +204,91 @@ public class MainComplete
 		Matrix One_Theta1_25_401;
 	}
 
-	public static Result processOneSample(Matrix theta1, Matrix theta2, Vector a1, Vector y_)
+	/**
+	 * Be careful with the index number here
+	 * Assume following structure (four layers L = 4)
+	 * input layer (layer 1) -> layer 2 -> layer 3 -> output layer (layer 4	)
+	 *              z1, a1,   theta1
+	 * we use _ to denote a vector (column vector)
+	 * @param thetas [t1, t2, t3 ...] thetas[0] corresponds to theta1, with is from layer 1 to layer 2.
+	 * @param x_ the input with bias
+	 * @param y_ the known result
+	 * @return the thetas we learn from one sample in one iteration
+	 */
+	public static Matrix[] processOneSample(Matrix[] thetas, Vector x_, Vector y_)
 	{
-		Vector z2_25 = theta1.multiply(a1);
-		Vector a2_26 = MatrixFunctions.addBias(MathFunctions.sigmoid(z2_25));
-		Vector z3_10 = theta2.multiply((a2_26));
-		Vector A3_10 = MathFunctions.sigmoid(z3_10);
+		// zs are the waited input of each layer
+		// So it starts with z2, which is zs[0]
+		// [z2, z3, z4 ...]
+		Vector[] zs = new Vector[thetas.length];
+		
+		// as are the action of each layer
+		// So it starts with a1 which is the input x_, so a2 is the sigmoid of z2, then add bias 1
+		// [a1, a2 ,a3 ...]
+		Vector[] as = new Vector[thetas.length + 1];
+		as[0] = x_;
+		// 2 Forward propagation
+		
+		for (int i =0;i <thetas.length ;i++)
+		{
+			zs[i] = thetas[i].multiply(as[i]);
+			if (i== thetas.length -1)
+			{
+				as[i+1] = MathFunctions.sigmoid(zs[i]);
+			}
+			else
+			{
+				as[i+1] = MatrixFunctions.addBias(MathFunctions.sigmoid(zs[i]));
+			}
+		}
+		
+		
+//		Vector a2_26 = MatrixFunctions.addBias(MathFunctions.sigmoid(z2_25));
+//		Vector z3_10 = thetas[1].multiply((a2_26));
+//		Vector A3_10 = MathFunctions.sigmoid(z3_10);
 		// System.out.println(A3_10);
 		// System.out.println(y_);
 		// 3
-		Vector delta3_10 = A3_10.subtract(y_);
-
-		Vector delta2_26 = theta2.transpose().multiply(delta3_10).hadamardProduct(MatrixFunctions.addBias(MathFunctions.sigmoidDerivative(z2_25)));
-
-		// 4
-		Result result = new MainComplete.Result();
-		result.One_Theta2_10_26 = delta3_10.toColumnMatrix().multiply(a2_26.toRowMatrix());
-
-		result.One_Theta1_25_401 = delta2_26.select(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 }).toColumnMatrix()
-				.multiply(a1.toRowMatrix());
+		
+		// 3 Backward propagation
+		// The derivative of each layer
+		// [d2,d3,d4...]
+		Vector delta[] = new Vector[thetas.length];
+		Matrix derivative[] = new Matrix[thetas.length];
+		// The first derivative we calculate is for the output layer
+		// The formula depends on the cost function, we take it out of the loop
+		delta[thetas.length -1] = as[thetas.length].subtract(y_);
+		// as starts from a1
+		derivative[thetas.length -1] = delta[thetas.length -1].toColumnMatrix().multiply(as[thetas.length -1].toRowMatrix());
+		// Then we calculae L -1, L-2
+		for (int i = thetas.length-1; i>0; i--)
+		{
+			
+			// Vector delta3_10 = A3_10.subtract(y_);
+			
+			// This is the core of backward propagation
+			
+			
+			// 3 Take the thetas between L+1, L, multiply the derivative from L+1, multiply the z from L
+			// Based on our index this is 
+			// theta 2 T* dev 3 .* g'z2
+			// which is theta[i], dev[i], z[i-1]
+			
+			delta[i-1] = thetas[i].transpose().multiply(delta[i])
+					.hadamardProduct(MatrixFunctions.addBias(MathFunctions.sigmoidDerivative(zs[i-1])));
+			// 4 Finally get the derivative, remove bias
+			derivative[i-1] = delta[i -1].sliceRight(1).toColumnMatrix().multiply(as[i -1].toRowMatrix());
+		}
+		
+//		// 4
+//		Result result = new MainComplete.Result();
+//		result.One_Theta2_10_26 = delta3_10.toColumnMatrix().multiply(a2_26.toRowMatrix());
+//
+//		result.One_Theta1_25_401 = delta2_26.select(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 }).toColumnMatrix()
+//				.multiply(x_.toRowMatrix());
 		
 		
-		return result;
+		return derivative;
 
 	}
 

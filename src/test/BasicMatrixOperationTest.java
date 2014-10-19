@@ -9,6 +9,8 @@ import org.la4j.matrix.Matrices;
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic1DMatrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
+import org.la4j.vector.Vector;
+import org.la4j.vector.dense.BasicVector;
 
 import junit.framework.TestCase;
 
@@ -35,5 +37,12 @@ public class BasicMatrixOperationTest extends TestCase{
 		
 		assertTrue(a.multiply(ainv).is(Matrices.IDENTITY_MATRIX));
 	}
+	
+	public void testVectorOp()
+	{
+		Vector v = new BasicVector(new double[] { 1.0, 2.0, 3.0 });
+		System.out.println(v.sliceRight(1));
+	}
+
 
 }
