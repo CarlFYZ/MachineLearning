@@ -1,4 +1,7 @@
-package logesticregression;
+package ml.logesticregression;
+
+import ml.common.util.PlotUtil;
+import ml.core.linearalgebra.MatrixFunctions;
 
 import org.math.plot.*;
 
@@ -18,9 +21,6 @@ import org.la4j.matrix.functor.MatrixFunction;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 import org.la4j.vector.dense.DenseVector;
-
-import util.PlotUtil;
-import util.la.MatrixUtil;
 
 
 public class Main {
@@ -52,11 +52,11 @@ public class Main {
 //		double[] yArray = ((DenseVector) y).toArray();
 
 		// X with 1 as first column
-		Matrix  X = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1), xMatrix, true);
-		X = MatrixUtil.concatenate( X, X.getColumn(1).hadamardProduct(X.getColumn(1)).divide(1), true);
-		X = MatrixUtil.concatenate( X, X.getColumn(2).hadamardProduct(X.getColumn(2)).divide(1), true);
-		X = MatrixUtil.concatenate( X, X.getColumn(1).hadamardProduct(X.getColumn(2)).divide(1), true);
-		X = MatrixUtil.concatenate( X, X.getColumn(2).hadamardProduct(X.getColumn(1)).divide(1), true);
+		Matrix  X = MatrixFunctions.concatenate(MatrixFunctions.createVector(m, 1), xMatrix, true);
+		X = MatrixFunctions.concatenate( X, X.getColumn(1).hadamardProduct(X.getColumn(1)).divide(1), true);
+		X = MatrixFunctions.concatenate( X, X.getColumn(2).hadamardProduct(X.getColumn(2)).divide(1), true);
+		X = MatrixFunctions.concatenate( X, X.getColumn(1).hadamardProduct(X.getColumn(2)).divide(1), true);
+		X = MatrixFunctions.concatenate( X, X.getColumn(2).hadamardProduct(X.getColumn(1)).divide(1), true);
 
 		// Theta
 		double[] thetaArray = new double[] {-5.980, 25.178, 24.244, -7.696, -2.272, 18.421, 18.421};
@@ -110,9 +110,9 @@ public class Main {
 		};
 		
 		
-		Matrix ones = MatrixUtil.select(xMatrix.resizeColumns(2), matrix.getColumn(2), 1, false);
+		Matrix ones = MatrixFunctions.select(xMatrix.resizeColumns(2), matrix.getColumn(2), 1, false);
 		
-		Matrix zeros = MatrixUtil.select(xMatrix.resizeColumns(2), matrix.getColumn(2), 0, false);
+		Matrix zeros = MatrixFunctions.select(xMatrix.resizeColumns(2), matrix.getColumn(2), 0, false);
 		
 		plot.addScatterPlot("my plot", Color.RED, ((Basic2DMatrix)ones).toArray());
 		
@@ -124,23 +124,22 @@ public class Main {
 		
 		//Basic2DMatrix samples = new Basic2DMatrix(MatrixUtil.create2DMatrix(20, 20, 100, 100, 2));
 		
-		double[][] sampleSpace = MatrixUtil.createMatrix(new double[][]{{-.5,-.5},{1,1}},0.05);
-		sampleSpace = MatrixUtil.create2DMatrix(-.5, -.5,1,1,0.05);
+		double[][] sampleSpace = MatrixFunctions.create2DArray(new double[][]{{-.5,-.5},{1,1}},0.05);
+		sampleSpace = MatrixFunctions.create2DArray(-.5, -.5,1,1,0.05);
 		Matrix samples = new Basic2DMatrix(	sampleSpace);
 		
-		Vector ones2 = MatrixUtil.createVector(samples.rows(), 1);
-		Matrix sampleX = MatrixUtil.concatenate(ones2, samples , true);
-		sampleX = MatrixUtil.concatenate( sampleX, sampleX.getColumn(1).hadamardProduct(sampleX.getColumn(1)).divide(1), true);
-		sampleX = MatrixUtil.concatenate( sampleX, sampleX.getColumn(2).hadamardProduct(sampleX.getColumn(2)).divide(1), true);
-		sampleX = MatrixUtil.concatenate( sampleX, sampleX.getColumn(1).hadamardProduct(sampleX.getColumn(2)).divide(1), true);
-		sampleX = MatrixUtil.concatenate( sampleX, sampleX.getColumn(1).hadamardProduct(sampleX.getColumn(2)).divide(1), true);
-		
+		Vector ones2 = MatrixFunctions.createVector(samples.rows(), 1);
+		Matrix sampleX = MatrixFunctions.concatenate(ones2, samples , true);
+		sampleX = MatrixFunctions.concatenate( sampleX, sampleX.getColumn(1).hadamardProduct(sampleX.getColumn(1)).divide(1), true);
+		sampleX = MatrixFunctions.concatenate( sampleX, sampleX.getColumn(2).hadamardProduct(sampleX.getColumn(2)).divide(1), true);
+		sampleX = MatrixFunctions.concatenate( sampleX, sampleX.getColumn(1).hadamardProduct(sampleX.getColumn(2)).divide(1), true);
+		sampleX = MatrixFunctions.concatenate( sampleX, sampleX.getColumn(1).hadamardProduct(sampleX.getColumn(2)).divide(1), true);
 		
 		Vector sampleY = sampleX.multiply(theta);
 
-		Matrix sampleOnes = MatrixUtil.select(samples, sampleY, cp, 0,1, false);
+		Matrix sampleOnes = MatrixFunctions.select(samples, sampleY, cp, 0, 1, false);
 
-		Matrix sampleZeros = MatrixUtil.select(samples, sampleY, cp, 0, -1, false);
+		Matrix sampleZeros = MatrixFunctions.select(samples, sampleY, cp, 0, -1, false);
 		
 		plot.addScatterPlot("my plot", Color.BLACK, ((Basic2DMatrix)sampleOnes).toArray());
 		

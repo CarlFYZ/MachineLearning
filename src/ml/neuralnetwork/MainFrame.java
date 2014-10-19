@@ -1,4 +1,4 @@
-package neuralnetwork;
+package ml.neuralnetwork;
 
 import java.awt.Color;
 import java.awt.Dimension;

@@ -1,4 +1,4 @@
-package util.la;
+package ml.core.linearalgebra;
 
 import java.util.Comparator;
 
@@ -9,7 +9,7 @@ import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 
-public class MatrixUtil 
+public class MatrixFunctions 
 {
 	
 	/**
@@ -42,7 +42,7 @@ public class MatrixUtil
 	/**
 	 * Create a vector will all same values
 	 */
-	public static double[][] create2DMatrix(double startX, double startY, double endX, double endY, double step)
+	public static double[][] create2DArray(double startX, double startY, double endX, double endY, double step)
 	{
 		
 		
@@ -53,8 +53,6 @@ public class MatrixUtil
 		System.out.println(totalDots);
 		double[][] dots = new double[totalDots][2];
 		
-//		dots[0][0] = startX;
-//		dots[0][1] = startY;
 		int index = 0;
 		for (int i =0; i<totalXs; i++)
 		{
@@ -72,7 +70,7 @@ public class MatrixUtil
 	
 	
 	
-	public static double[][] createMatrix(double[][] startAndEnd, double step)
+	public static double[][] create2DArray(double[][] startAndEnd, double step)
 	{
 		
 		int totalColumns = startAndEnd[0].length;
@@ -94,28 +92,11 @@ public class MatrixUtil
 			}
 			
 		}
-		
-////		dots[0][0] = startX;
-////		dots[0][1] = startY;
-//		int index = 0;
-//		
-//		for (int dimention = 0; dimention < totalColumns; dimention++)
-//		
-//		for (int i =0; i<totalSizes[i]; i++)
-//		{
-//			for (int j = 0; j <totalYs; j++)
-//			{
-//				 
-//				dots[index][0]  = (startX + i*step);
-//				dots[index][1]  = (startY + j*step);
-//				
-//				index ++;
-//			}
-//		}
+
 		return dots;
 	}
 	
-	public static Basic2DMatrix initialRandomMatrix(int rows, int cols, double epsilon)
+	public static Basic2DMatrix createRandomMatrix(int rows, int cols, double epsilon)
 	{
 		double[][] matrix2d = new double[rows][cols];
 
@@ -130,7 +111,7 @@ public class MatrixUtil
 		return new Basic2DMatrix(matrix2d);
 	}
 	
-	public static Matrix initialMatrix(int rows, int cols, double value)
+	public static Basic2DMatrix createMatrix(int rows, int cols, double value)
 	{
 		double [][] matrix2d= new double[rows][cols];
 		if (value != 0)
@@ -148,7 +129,7 @@ public class MatrixUtil
 		return new Basic2DMatrix(matrix2d);
 	}
 	
-	public static Matrix initialDiagonalMatrix(int size, double value)
+	public static Basic2DMatrix createDiagonalMatrix(int size, double value)
 	{
 		double [][] matrix2d= new double[size][size];
 		if (value != 0)
@@ -157,30 +138,33 @@ public class MatrixUtil
 			{
 					matrix2d[i][i] = value;
 			}
-				
 		}
 		
 		return  new Basic2DMatrix(matrix2d);
 	}
 	
+	/**
+	 * Add a row or column with all 1 values
+	 * @param matrix
+	 * @param addColumn
+	 * @return
+	 */
 	public static Matrix addBias(Matrix matrix, boolean addColumn) 
 	{
 		// Number of samples
 		if (addColumn)
 		{
-		int m = matrix.rows();
+			int m = matrix.rows();
+			// add 1 to the fist column
+			Matrix result = MatrixFunctions.concatenate(MatrixFunctions.createVector(m, 1), matrix, addColumn);
 
-		// add 1 to the fist column
-		Matrix result = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1), matrix, addColumn);
-
-		return result;
+			return result;
 		}
 		else
 		{
 			int m = matrix.columns();
-
-			// add 1 to the fist column
-			Matrix result = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1).toRowMatrix(), matrix, addColumn);
+			// add 1 to the fist row
+			Matrix result = MatrixFunctions.concatenate(MatrixFunctions.createVector(m, 1).toRowMatrix(), matrix, addColumn);
 
 			return result;
 		}
@@ -190,7 +174,7 @@ public class MatrixUtil
 	{
 			Matrix matrix = vector.toColumnMatrix();
 			// add 1 to the fist column
-			Matrix result = MatrixUtil.concatenate(MatrixUtil.createVector(1, 1).toRowMatrix(), matrix, false);
+			Matrix result = MatrixFunctions.concatenate(MatrixFunctions.createVector(1, 1).toRowMatrix(), matrix, false);
 
 			return result.toColumnVector();
 
@@ -240,14 +224,23 @@ public class MatrixUtil
 		{
 			if (b.get(i)== value)
 			{
-				result = MatrixUtil.concatenate(result, a.getRow(i) , isHorizontal);
+				result = MatrixFunctions.concatenate(result, a.getRow(i) , isHorizontal);
 			}
 		}
 		return result;
 	}
 
 	
-	
+	/**
+	 * 
+	 * @param a
+	 * @param b
+	 * @param comp
+	 * @param value
+	 * @param selector
+	 * @param isHorizontal
+	 * @return
+	 */
 	public static Matrix select(Matrix a, Vector b, Comparator<Double> comp, double value, int selector, boolean isHorizontal)
 	{
 		Matrix result = null;
@@ -259,23 +252,15 @@ public class MatrixUtil
 			}
 			if ( comp.compare( b.get(i), value) == selector )
 			{
-				//System.out.println("+++" + a.getRow(i));
-				result = MatrixUtil.concatenate(result, a.getRow(i) , isHorizontal);
+				result = MatrixFunctions.concatenate(result, a.getRow(i) , isHorizontal);
 			}
 			else
 			{
-				//System.out.println("---" + a.getRow(i));
 			}
 		}
 		return result;
 	}
-	
-//	public enum Comparator
-//	{
-//		GREATER,
-//		EQUAL,
-//		SMALLER;
-//	}
+
 
 	/**
 	 * Concatenate two matrix uses matrix operation
@@ -306,7 +291,7 @@ public class MatrixUtil
 			}
 			b = b.resizeColumns(columnsA + columnsB);
 			a = a.resizeColumns(columnsA + columnsB);
-			Basic2DMatrix transformMatrix = new Basic2DMatrix(squareMatrix);
+			Matrix transformMatrix = new Basic2DMatrix(squareMatrix);
 			return b.multiply( transformMatrix).add(a);
 	
 		} 
@@ -337,7 +322,6 @@ public class MatrixUtil
 	 */
 	protected static Matrix concatenateSlow(Matrix a, Matrix b, boolean isHorizontal)
 	{
-		
 		if (isHorizontal)
 		{
 	
@@ -363,6 +347,5 @@ public class MatrixUtil
 			}
 			return a.add( b );
 		}
-		
 	}
 }

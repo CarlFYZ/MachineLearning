@@ -1,4 +1,4 @@
-package util;
+package ml.common.util;
 
 import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.vector.Vector;

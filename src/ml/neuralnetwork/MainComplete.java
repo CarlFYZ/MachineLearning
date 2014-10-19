@@ -1,22 +1,20 @@
-package neuralnetwork;
+package ml.neuralnetwork;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-import ml.MathFunctions;
+import ml.core.linearalgebra.MatrixFunctions;
+import ml.core.math.MathFunctions;
 
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.matrix.functor.MatrixFunction;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
-
-import util.la.MatrixUtil;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
@@ -32,7 +30,7 @@ public class MainComplete
 	{
 		MatFileReader matfilereader = new MatFileReader("./data/ex4weights.mat");
 		// model parameters
-		double alpha = 0.001;
+		double alpha = 0.1;
 		double lambda = 1;
 		
 		// theta1 and theta2 to train
@@ -43,8 +41,9 @@ public class MainComplete
 		System.out.println("theta1:" + theta1ml);
 		System.out.println("theta2:" + theta2ml);
 
-		theta1 = MatrixUtil.initialRandomMatrix(25, 401, 0.12);
-		theta2 = MatrixUtil.initialRandomMatrix(10, 26, 0.12);
+		theta1 = MatrixFunctions.createRandomMatrix(25, 401, 0.12);
+		theta2 = MatrixFunctions.createRandomMatrix(10, 26, 0.12);
+		
 		MatFileReader matfilereader2 = new MatFileReader("./data/ex4data1.mat");
 		MLDouble Xml = (MLDouble) matfilereader2.getMLArray("X");
 
@@ -57,7 +56,7 @@ public class MainComplete
 		int m = xMatrix.rows();
 
 		// X with 1 as first column
-		Matrix X = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1), xMatrix, true);
+		Matrix X = MatrixFunctions.concatenate(MatrixFunctions.createVector(m, 1), xMatrix, true);
 
 		// y Vector and Y matrix(10 * 5000)
 		MLDouble yml = (MLDouble) matfilereader2.getMLArray("y");
@@ -75,14 +74,14 @@ public class MainComplete
 		// System.out.println(Y);
 
 		// Forward propagation
-		Matrix A = MathFunctions.sigmoid(theta2.multiply(MatrixUtil.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
+		Matrix A = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
 
 		// System.out.println(A.rows() + "x" + A.columns());
 		// System.out.println(A.resize(2, 1000));
 
 		// Cost function
-		Matrix zero10_5000 = MatrixUtil.initialMatrix(10, 5000, 0);
-		Matrix one10_5000 = MatrixUtil.initialMatrix(10, 5000, 1);
+		Matrix zero10_5000 = MatrixFunctions.createMatrix(10, 5000, 0);
+		Matrix one10_5000 = MatrixFunctions.createMatrix(10, 5000, 1);
 
 		// Matrix fo1 =
 		// (zero10_5000.subtract(Y)).hadamardProduct(MathFunctions.log(A));
@@ -93,8 +92,8 @@ public class MainComplete
 
 		// Regularized cost
 
-		Matrix trans400 = MatrixUtil.concatenate(MatrixUtil.createVector(400, 0).toRowMatrix(), MatrixUtil.initialDiagonalMatrix(400, 1), false);
-		Matrix trans25 = MatrixUtil.concatenate(MatrixUtil.createVector(25, 0).toRowMatrix(), MatrixUtil.initialDiagonalMatrix(25, 1), false);
+		Matrix trans400 = MatrixFunctions.concatenate(MatrixFunctions.createVector(400, 0).toRowMatrix(), MatrixFunctions.createDiagonalMatrix(400, 1), false);
+		Matrix trans25 = MatrixFunctions.concatenate(MatrixFunctions.createVector(25, 0).toRowMatrix(), MatrixFunctions.createDiagonalMatrix(25, 1), false);
 
 		// Matrix theta1a = theta1.multiply(trans400);
 		// Matrix theta2a = theta2.multiply(trans25);
@@ -107,11 +106,11 @@ public class MainComplete
 		// System.out.println(J);
 		// X.resize(arg0, arg1, arg2)
 
-		for (int o = 0; o < 2; o++)
+		for (int o = 0; o < 400; o++)
 		{
 			// sigmoid gradient(derivative)
-			Matrix cumulativeTheta1Derivative = MatrixUtil.initialMatrix(25, 401, 0);
-			Matrix cumulativeTheta2Derivative = MatrixUtil.initialMatrix(10, 26, 0);
+			Matrix cumulativeTheta1Derivative = MatrixFunctions.createMatrix(25, 401, 0);
+			Matrix cumulativeTheta2Derivative = MatrixFunctions.createMatrix(10, 26, 0);
 			for (int i = 0; i < 5000; i++)
 			{
 				Result result = processOneSample(theta1, theta2, X.getRow(i), Y.getColumn(i));
@@ -135,8 +134,8 @@ public class MainComplete
 					return arg2;
 				}
 			};
-			Matrix theta1RegDerivative = theta1.multiply(lambda/m).transform(matrixFunctionClearColumn0);
 			
+			Matrix theta1RegDerivative = theta1.multiply(lambda/m).transform(matrixFunctionClearColumn0);
 			Matrix theta2RegDerivative = theta2.multiply(lambda/m).transform(matrixFunctionClearColumn0);
 			
 			
@@ -170,30 +169,32 @@ public class MainComplete
 
 			System.out.println(J);
 			
-			System.out.println("Result -----------------------------");
-			Matrix predict = MathFunctions.sigmoid(theta2.multiply(MatrixUtil.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
-			//System.out.println(predict.rows() + " " + predict.columns());
-			int correctCount = 0;
-			for(int n=0;n<5000;n++)
-			{
-				Vector onePredict = predict.getColumn(n);
-				int highest =0;
-				for (int p=1;p<10;p++)
-				{
-					if(onePredict.get(highest) < onePredict.get(p))
-					{
-						highest = p;
-					}
-					
-				}
-				if (highest==y.get(n)-1)
-				{
-					correctCount++;
-				}
-			}
-			System.out.println(correctCount);
+
 		}
 
+		System.out.println("Result -----------------------------");
+		Matrix predict = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
+		//System.out.println(predict.rows() + " " + predict.columns());
+		int correctCount = 0;
+		for(int n=0;n<5000;n++)
+		{
+			Vector onePredict = predict.getColumn(n);
+			int highest =0;
+			for (int p=1;p<10;p++)
+			{
+				if(onePredict.get(highest) < onePredict.get(p))
+				{
+					highest = p;
+				}
+				
+			}
+			if (highest==y.get(n)-1)
+			{
+				correctCount++;
+			}
+		}
+		System.out.println(correctCount);
+		
 		// System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15,
 		// -100)));
 		theta1result = theta1;
@@ -206,7 +207,7 @@ public class MainComplete
 			boolean isRegularize)
 	{
 		Matrix A;
-		A = MathFunctions.sigmoid(theta2.multiply(MatrixUtil.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
+		A = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
 
 		Matrix theta1a = theta1.multiply(trans400);
 		Matrix theta2a = theta2.multiply(trans25);
@@ -232,7 +233,7 @@ public class MainComplete
 	public static Result processOneSample(Matrix theta1, Matrix theta2, Vector a1, Vector y_)
 	{
 		Vector z2_25 = theta1.multiply(a1);
-		Vector a2_26 = MatrixUtil.addBias(MathFunctions.sigmoid(z2_25));
+		Vector a2_26 = MatrixFunctions.addBias(MathFunctions.sigmoid(z2_25));
 		Vector z3_10 = theta2.multiply((a2_26));
 		Vector A3_10 = MathFunctions.sigmoid(z3_10);
 		// System.out.println(A3_10);
@@ -240,7 +241,7 @@ public class MainComplete
 		// 3
 		Vector delta3_10 = A3_10.subtract(y_);
 
-		Vector delta2_26 = theta2.transpose().multiply(delta3_10).hadamardProduct(MatrixUtil.addBias(MathFunctions.sigmoidDerivative(z2_25)));
+		Vector delta2_26 = theta2.transpose().multiply(delta3_10).hadamardProduct(MatrixFunctions.addBias(MathFunctions.sigmoidDerivative(z2_25)));
 
 		// 4
 		Result result = new MainComplete.Result();
@@ -280,8 +281,8 @@ public class MainComplete
                 double [] a = pdraw.input;
                 
                 Vector predict = MathFunctions.sigmoid(
-                		theta2result.multiply(MatrixUtil.addBias(
-                				MathFunctions.sigmoid(theta1result.multiply(MatrixUtil.addBias(new BasicVector(a)))))));
+                		theta2result.multiply(MatrixFunctions.addBias(
+                				MathFunctions.sigmoid(theta1result.multiply(MatrixFunctions.addBias(new BasicVector(a)))))));
                 System.out.println(predict);
                 int highest=0;
                 for (int p=1;p<10;p++)

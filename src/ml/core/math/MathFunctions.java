@@ -1,4 +1,4 @@
-package ml;
+package ml.core.math;
 
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.functor.MatrixFunction;

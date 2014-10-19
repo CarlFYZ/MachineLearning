@@ -1,17 +1,16 @@
-package neuralnetwork;
+package ml.neuralnetwork;
 
 import static org.math.array.DoubleArray.increment;
 
 import javax.swing.JFrame;
 
-import ml.MathFunctions;
+import ml.core.linearalgebra.MatrixFunctions;
+import ml.core.math.MathFunctions;
 
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.vector.dense.BasicVector;
 import org.math.plot.Plot3DPanel;
-
-import util.la.MatrixUtil;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
@@ -42,11 +41,11 @@ public class Main
 		int m = xMatrix.rows();
 
 		// X with 1 as first column
-		Matrix  X = MatrixUtil.concatenate(MatrixUtil.createVector(m, 1), xMatrix, true);
+		Matrix  X = MatrixFunctions.concatenate(MatrixFunctions.createVector(m, 1), xMatrix, true);
 		
 		
 		// Forward propagation
-		Matrix A = MathFunctions.sigmoid( theta2.multiply( MatrixUtil.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose() )), false)));
+		Matrix A = MathFunctions.sigmoid( theta2.multiply( MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose() )), false)));
 		
 		System.out.println(A.rows() + "x" + A.columns());
 		System.out.println(A.resize(2, 1000));

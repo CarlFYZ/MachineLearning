@@ -1,4 +1,4 @@
-package util;
+package ml.common.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class FileUtil {
 	
 	/**
-	 * File read method
+	 * Read a 
 	 * @param fileName
 	 * @return
 	 */
