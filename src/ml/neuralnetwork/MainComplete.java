@@ -12,7 +12,6 @@ import ml.core.math.MathFunctions;
 
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
-import org.la4j.matrix.functor.MatrixFunction;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 
@@ -31,9 +30,9 @@ public class MainComplete
 		MatFileReader matfilereader = new MatFileReader("./data/ex4weights.mat");
 		
 		// model parameters
-		double alpha = 0.01;
+		double alpha = 0.05;
 		// if lambda >= 0, then parameter regularization is used
-		double lambda = 1;
+		double lambda = 0;
 		
 		
 		// theta1 and theta2 to train
@@ -44,9 +43,13 @@ public class MainComplete
 		System.out.println("theta1:" + theta1ml);
 		System.out.println("theta2:" + theta2ml);
 
-		theta1 = MatrixFunctions.createRandomMatrix(25, 401, 0.12);
-		theta2 = MatrixFunctions.createRandomMatrix(10, 26, 0.12);
-		//Matrix theta3 = MatrixFunctions.createRandomMatrix(10, 16, 0.12);
+		theta1 = MatrixFunctions.createRandomMatrix(25, 401, Math.sqrt(60.0 / (25 + 401)) );
+		theta2 = MatrixFunctions.createRandomMatrix(15, 26, Math.sqrt(60.0 / (15 + 26)));
+		Matrix theta3 = MatrixFunctions.createRandomMatrix(10, 16, Math.sqrt(60.0 / (10 + 16)));
+		
+		System.out.println(theta1);
+		System.out.println(theta2);
+		System.out.println(theta3);
 		
 		MatFileReader matfilereader2 = new MatFileReader("./data/ex4data1.mat");
 		MLDouble Xml = (MLDouble) matfilereader2.getMLArray("X");
@@ -75,13 +78,13 @@ public class MainComplete
 		Matrix Y = new Basic2DMatrix(Ys);
 		
 		// The thetas to learn, it starts from the original input and changes every iteration
-		Matrix[] learningThetas = new Matrix[] {theta1, theta2};
+		Matrix[] learningThetas = new Matrix[] {theta1, theta2, theta3};
 
 
 		///////////////////////////////////////////////////////////////
 		//                   Start training                          // 
 		///////////////////////////////////////////////////////////////
-		for (int o = 0; o < 400 ; o++)
+		for (int o = 0; o < 800 ; o++)
 		{
 			// We need to cumulative the derivatives over all the samples and then average
 			// Here we initial all them to zeros
@@ -106,7 +109,7 @@ public class MainComplete
 			}
 
 			//verify gradient, run this before update learningThetas, disable it before training
-			// verifyGradient(lambda, m, X, Y, learningThetas, averageDerivatives);
+			verifyGradient(lambda, m, X, Y, learningThetas, averageDerivatives);
 			
 			// Calculate regularized derivative (if configured) and apply it to the learningThetas
 			Matrix regularizedDerivative[] = new Matrix [learningThetas.length];
@@ -125,7 +128,6 @@ public class MainComplete
 					learningThetas[j] = learningThetas[j].subtract(averageDerivatives[j].multiply(alpha));
 				}
 			}
-			
 
 
 			
@@ -133,7 +135,10 @@ public class MainComplete
 			double J = calculateCost(learningThetas, m, X, Y, lambda);
 			System.out.println("Step = " + o + " J= " + J);
 			
-			predict( learningThetas, X, y_);
+			if (o%10 == 0)
+			{
+				predict( learningThetas, X, y_);
+			}
 
 		}
 //		double J = calculateCost(learningThetas, m, X, Y, lambda);
@@ -216,12 +221,15 @@ public class MainComplete
 		// System.out.println("Result -----------------------------");
 
 		// 
-		Matrix predict = MathFunctions.sigmoid(learningThetas[0].multiply(X.transpose())); //A2
-		for (int i = 1; i< learningThetas.length -1; i++)
+		Matrix predict = MathFunctions.sigmoid(learningThetas[0].multiply(X.transpose())); //output layer
+		for (int i = 1; i< learningThetas.length; i++)
 		{
+			// System.out.println("step " + i);
 			//predict = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
 			predict = MathFunctions.sigmoid(learningThetas[i].multiply(MatrixFunctions.addBias(predict, false)));
 		}
+		
+		//System.out.println(predict);
 		
 		//System.out.println(predict.rows() + " " + predict.columns());
 		int correctCount = 0;
