@@ -29,9 +29,12 @@ public class MainComplete
 	public static void main(String[] args) throws Exception
 	{
 		MatFileReader matfilereader = new MatFileReader("./data/ex4weights.mat");
+		
 		// model parameters
-		double alpha = 0.1;
+		double alpha = 0.01;
+		// if lambda >= 0, then parameter regularization is used
 		double lambda = 1;
+		
 		
 		// theta1 and theta2 to train
 		MLDouble theta1ml = (MLDouble) matfilereader.getMLArray("Theta1");
@@ -43,6 +46,7 @@ public class MainComplete
 
 		theta1 = MatrixFunctions.createRandomMatrix(25, 401, 0.12);
 		theta2 = MatrixFunctions.createRandomMatrix(10, 26, 0.12);
+		//Matrix theta3 = MatrixFunctions.createRandomMatrix(10, 16, 0.12);
 		
 		MatFileReader matfilereader2 = new MatFileReader("./data/ex4data1.mat");
 		MLDouble Xml = (MLDouble) matfilereader2.getMLArray("X");
@@ -60,13 +64,13 @@ public class MainComplete
 
 		// y Vector and Y matrix(10 * 5000)
 		MLDouble yml = (MLDouble) matfilereader2.getMLArray("y");
-		BasicVector y = (BasicVector) (new Basic2DMatrix(yml.getArray())).getColumn(0);
+		BasicVector y_ = (BasicVector) (new Basic2DMatrix(yml.getArray())).getColumn(0);
 		// System.out.println(y);
 
 		double[][] Ys = new double[10][5000];
-		for (int i = 0; i < y.length(); i++)
+		for (int i = 0; i < y_.length(); i++)
 		{
-			Ys[(int) y.get(i) - 1][i] = 1;
+			Ys[(int) y_.get(i) - 1][i] = 1;
 		}
 		Matrix Y = new Basic2DMatrix(Ys);
 		
@@ -77,78 +81,148 @@ public class MainComplete
 		///////////////////////////////////////////////////////////////
 		//                   Start training                          // 
 		///////////////////////////////////////////////////////////////
-		for (int o = 0; o < 3; o++)
+		for (int o = 0; o < 400 ; o++)
 		{
-			// sigmoid gradient(derivative)
-			Matrix cumulativeTheta1Derivative = MatrixFunctions.createMatrix(25, 401, 0);
-			Matrix cumulativeTheta2Derivative = MatrixFunctions.createMatrix(10, 26, 0);
-			
-			//Matrix cumulativeDerivative[] = new Matrix[thetas.length];
-			//MatrixFunctions.createMatrix(25, 401, 0);
-			
-			
+			// We need to cumulative the derivatives over all the samples and then average
+			// Here we initial all them to zeros
+			Matrix averageDerivatives[] = new Matrix[learningThetas.length];
+			for (int i = 0; i< learningThetas.length ; i ++)
+			{
+				averageDerivatives[i] =  MatrixFunctions.createMatrix(learningThetas[i].rows(), learningThetas[i].columns(), 0);
+			}
+
+			// Here we calculate the derivatives from all samples
 			for (int i = 0; i < m; i++)
 			{
+				// This is the core part of NN, processing one sample 
 				Matrix[] result = processOneSample(learningThetas,X.getRow(i), Y.getColumn(i));
 
-				cumulativeTheta1Derivative = cumulativeTheta1Derivative.add(result[0]);
-				cumulativeTheta2Derivative = cumulativeTheta2Derivative.add(result[1]);
-			}
-			Matrix theta1Derivative = cumulativeTheta1Derivative.divide(m);
-			Matrix theta2Derivative = cumulativeTheta2Derivative.divide(m);
-
-			MatrixFunction matrixFunctionClearColumn0 = new MatrixFunction()
-			{
-				
-				@Override
-				public double evaluate(int arg0, int arg1, double arg2)
+				// average derivative
+				for (int j = 0; j< learningThetas.length ; j ++)
 				{
-					if (arg1 ==0)
-					{
-						return 0;
-					}
-					return arg2;
+					averageDerivatives[j] = averageDerivatives[j].add(result[j].divide(m));
 				}
-			};
+
+			}
+
+			//verify gradient, run this before update learningThetas, disable it before training
+			// verifyGradient(lambda, m, X, Y, learningThetas, averageDerivatives);
 			
-			Matrix theta1RegDerivative = learningThetas[0].multiply(lambda/m).transform(matrixFunctionClearColumn0);
-			Matrix theta2RegDerivative = learningThetas[1].multiply(lambda/m).transform(matrixFunctionClearColumn0);
+			// Calculate regularized derivative (if configured) and apply it to the learningThetas
+			Matrix regularizedDerivative[] = new Matrix [learningThetas.length];
+			if (lambda >0)
+			{
+				for (int j = 0; j< learningThetas.length ; j ++)
+				{
+					regularizedDerivative[j] = learningThetas[j].multiply(lambda/m).transform(MatrixFunctions.ClearColumn0);
+					learningThetas[j] = learningThetas[j].subtract(averageDerivatives[j].multiply(alpha).add( regularizedDerivative[j].multiply(alpha)));
+				}
+			}
+			else
+			{
+				for (int j = 0; j< learningThetas.length ; j ++)
+				{
+					learningThetas[j] = learningThetas[j].subtract(averageDerivatives[j].multiply(alpha));
+				}
+			}
 			
-			
-			// System.out.println(theta1Derivative);
-			learningThetas[0] = (Basic2DMatrix) learningThetas[0].subtract(theta1Derivative.multiply(alpha).add( theta1RegDerivative.multiply(alpha)));
-			learningThetas[1] = (Basic2DMatrix) learningThetas[1].subtract(theta2Derivative.multiply(alpha).add( theta2RegDerivative.multiply(alpha)));
-
 
 
 			
-			double J = calculateCost(learningThetas, m, X, Y, lambda,  true);
-
-			// ////////////////////////// verify gradient
-			double epsilon = 0.0001;
-			Basic2DMatrix[][] testThetas = new Basic2DMatrix[2][2];
-
-			Matrix epsilonMatirx = MatrixFunctions.createMatrix(theta1.rows(), theta1.columns(), 0);
-			epsilonMatirx.set(3, 3, epsilon);
-			testThetas[0][0] = (Basic2DMatrix) learningThetas[0].subtract(epsilonMatirx);
-			testThetas[0][1] = (Basic2DMatrix) learningThetas[0].add(epsilonMatirx);
-
-			// Cost 1
-			//Matrix A1 = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(testThetas[0][0].multiply(X.transpose())), false)));
-			double J1 = calculateCost(new Matrix[] {testThetas[0][0], learningThetas[1]}, X.rows(), X, Y, lambda, true);
-			// Cost 2
-			//Matrix A2 = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(testThetas[0][1].multiply(X.transpose())), false)));
-			double J2 = calculateCost(new Matrix[] {testThetas[0][1], learningThetas[1]}, X.rows(), X, Y, lambda, true);
-			System.out.println((J2 - J1) / (2 * epsilon));
-			System.out.println(theta1RegDerivative.get(3, 3));
-
-			System.out.println(J);
+			// Calculate cost and print, not necessary for final product.
+			double J = calculateCost(learningThetas, m, X, Y, lambda);
+			System.out.println("Step = " + o + " J= " + J);
 			
+			predict( learningThetas, X, y_);
+
+		}
+//		double J = calculateCost(learningThetas, m, X, Y, lambda);
+//		System.out.println("Step = " + o + " J= " + J);
+//		
+//		predict( learningThetas, X, y_);
+		
+		
+		// System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15,
+		// -100)));
+//		theta1result = theta1;
+//		theta2result = theta2;
+		
+		//showSamples(xMatrix);
+	}
+
+	protected static void verifyGradient(double lambda, int m, Matrix X, Matrix Y, Matrix[] learningThetas, Matrix[] averageDerivatives)
+	{
+		double epsilon = 0.0001;
+		// We randomly pick one theta from first layer to test the gradient
+
+		int randomTheta = (int)(Math.random() * learningThetas.length);
+		int randomRow = (int)(Math.random() * learningThetas[randomTheta].rows());
+		int randomCol = (int)(Math.random() * learningThetas[randomTheta].columns());
+		System.out.println("Testing " + randomTheta + "/" + randomRow + "/" + randomCol );
+		 
+		
+		Matrix epsilonMatirx = MatrixFunctions.createMatrix(learningThetas[randomTheta].rows(), learningThetas[randomTheta].columns(), 0);
+		
+		epsilonMatirx.set(randomRow, randomCol, epsilon);
+		
+		Matrix randomThetaLeft = learningThetas[randomTheta].subtract(epsilonMatirx);
+		Matrix randomThetaRight = learningThetas[randomTheta].add(epsilonMatirx);
+		
+		Matrix[] toTest = new Matrix[learningThetas.length];
+		for (int i = 0; i < learningThetas.length; i++)
+		{
+			if (i == randomTheta)
+			{
+				toTest[i] = randomThetaLeft;
+			} else
+			{
+				toTest[i] = learningThetas[i];
+			}
 
 		}
 
-		System.out.println("Result -----------------------------");
-		Matrix predict = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
+		// Cost 1
+
+		double J1 = calculateCost(toTest, m, X, Y, lambda);
+
+		
+		// Cost 2
+		Matrix[] toTest2 = new Matrix[learningThetas.length];
+		for (int i = 0; i < learningThetas.length; i++)
+		{
+			if (i== randomTheta)
+			{
+				toTest2[i] = randomThetaRight;
+			}
+			else
+			{
+				toTest2[i] = learningThetas[i];	
+			}
+			
+		}
+		double J2 = calculateCost(toTest2, m, X, Y, lambda);
+		
+		System.out.println((J2 - J1) / (2 * epsilon) + " - " + averageDerivatives[randomTheta].get(randomRow, randomCol) + " = " + ((J2 - J1) / (2 * epsilon) - averageDerivatives[randomTheta].get(randomRow, randomCol))  );
+	}
+
+	/**
+	 * Now we can used the learnt thetas to test the result 
+	 * @param X
+	 * @param y
+	 * @param learningThetas
+	 */
+	protected static void predict(Matrix[] learningThetas, Matrix X, BasicVector y )
+	{
+		// System.out.println("Result -----------------------------");
+
+		// 
+		Matrix predict = MathFunctions.sigmoid(learningThetas[0].multiply(X.transpose())); //A2
+		for (int i = 1; i< learningThetas.length -1; i++)
+		{
+			//predict = MathFunctions.sigmoid(theta2.multiply(MatrixFunctions.addBias(MathFunctions.sigmoid(theta1.multiply(X.transpose())), false)));
+			predict = MathFunctions.sigmoid(learningThetas[i].multiply(MatrixFunctions.addBias(predict, false)));
+		}
+		
 		//System.out.println(predict.rows() + " " + predict.columns());
 		int correctCount = 0;
 		for(int n=0;n<5000;n++)
@@ -169,13 +243,6 @@ public class MainComplete
 			}
 		}
 		System.out.println(correctCount);
-		
-		// System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15,
-		// -100)));
-		theta1result = theta1;
-		theta2result = theta2;
-		
-		//showSamples(xMatrix);
 	}
 
 	/**
@@ -184,10 +251,10 @@ public class MainComplete
 	 * @param m number of samples
 	 * @param X all samples
 	 * @param Y the expected result
-	 * @param isRegularize regularize parameters or not
+	 * @param lambda regularize parameters, enabled if lambda > 0
 	 * @return
 	 */
-	private static double calculateCost(Matrix thetas[], int m, Matrix X, Matrix Y,	double lambda, boolean isRegularize)
+	private static double calculateCost(Matrix thetas[], int m, Matrix X, Matrix Y,	double lambda)
 	{
 		
 		
@@ -210,7 +277,7 @@ public class MainComplete
 		
 		
 		// Cost function include Regularize parameter
-		if (isRegularize)
+		if (lambda >0)
 		{
 			Matrix[] thetasReg = new Matrix[thetas.length];
 			
@@ -255,18 +322,7 @@ public class MainComplete
 		
 		// Forward propagation
 		
-		for (int i =0;i <thetas.length ;i++)
-		{
-			zs[i] = thetas[i].multiply(as[i]);
-			if (i== thetas.length -1)
-			{
-				as[i+1] = MathFunctions.sigmoid(zs[i]);
-			}
-			else
-			{
-				as[i+1] = MatrixFunctions.addBias(MathFunctions.sigmoid(zs[i]));
-			}
-		}
+		forwardPropagation(thetas, zs, as);
 		
 		// Backward propagation
 		// The derivative of each layer
@@ -288,9 +344,22 @@ public class MainComplete
 			// Based on our index this is 
 			// theta 2 T* dev 3 .* g'z2
 			// which is theta[i], dev[i], z[i-1]
-			delta[i-1] = thetas[i].transpose().multiply(delta[i])
+//			System.out.println("-----------" + i);
+//			System.out.println("=========" + thetas[i].rows() + "/" + thetas[i].columns());
+//			System.out.println("=========" + delta[i].length());
+			Vector tempDelta;
+			if (i == thetas.length-1)
+			{
+				tempDelta = delta[i];
+			}
+			else
+			{
+				tempDelta = delta[i].sliceRight(1);
+				
+			}
+			delta[i-1] = thetas[i].transpose().multiply(tempDelta)
 					.hadamardProduct(MatrixFunctions.addBias(MathFunctions.sigmoidDerivative(zs[i-1])));
-			
+			//System.out.println("-----------" + i);
 			// 4 Finally get the derivative, remove bias
 			derivative[i-1] = delta[i -1].sliceRight(1).toColumnMatrix().multiply(as[i -1].toRowMatrix());
 		}
@@ -298,6 +367,22 @@ public class MainComplete
 		
 		return derivative;
 
+	}
+
+	protected static void forwardPropagation(Matrix[] thetas, Vector[] zs, Vector[] as)
+	{
+		for (int i =0;i <thetas.length ;i++)
+		{
+			zs[i] = thetas[i].multiply(as[i]);
+			if (i== thetas.length -1)
+			{
+				as[i+1] = MathFunctions.sigmoid(zs[i]);
+			}
+			else
+			{
+				as[i+1] = MatrixFunctions.addBias(MathFunctions.sigmoid(zs[i]));
+			}
+		}
 	}
 
 	protected static void showSamples(Basic2DMatrix xMatrix ) throws InterruptedException

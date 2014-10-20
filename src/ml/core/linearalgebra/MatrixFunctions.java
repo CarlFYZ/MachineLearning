@@ -6,6 +6,7 @@ import org.la4j.LinearAlgebra;
 import org.la4j.inversion.MatrixInverter;
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
+import org.la4j.matrix.functor.MatrixFunction;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 
@@ -361,4 +362,18 @@ public class MatrixFunctions
 			return a.add( b );
 		}
 	}
+	
+	public static MatrixFunction ClearColumn0 = new MatrixFunction()
+	{
+		
+		@Override
+		public double evaluate(int arg0, int arg1, double arg2)
+		{
+			if (arg1 ==0)
+			{
+				return 0;
+			}
+			return arg2;
+		}
+	};
 }
