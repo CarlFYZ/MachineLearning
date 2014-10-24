@@ -32,7 +32,7 @@ public class MainComplete
 		// model parameters
 		double alpha = 0.05;
 		// if lambda >= 0, then parameter regularization is used
-		double lambda = 0;
+		double lambda = 1;
 		
 		
 		// theta1 and theta2 to train
@@ -108,27 +108,26 @@ public class MainComplete
 
 			}
 
-			//verify gradient, run this before update learningThetas, disable it before training
-			verifyGradient(lambda, m, X, Y, learningThetas, averageDerivatives);
+
 			
 			// Calculate regularized derivative (if configured) and apply it to the learningThetas
-			Matrix regularizedDerivative[] = new Matrix [learningThetas.length];
+			Matrix derivativeOfRregularizationTerm[] = new Matrix [learningThetas.length];
 			if (lambda >0)
 			{
 				for (int j = 0; j< learningThetas.length ; j ++)
 				{
-					regularizedDerivative[j] = learningThetas[j].multiply(lambda/m).transform(MatrixFunctions.ClearColumn0);
-					learningThetas[j] = learningThetas[j].subtract(averageDerivatives[j].multiply(alpha).add( regularizedDerivative[j].multiply(alpha)));
-				}
-			}
-			else
-			{
-				for (int j = 0; j< learningThetas.length ; j ++)
-				{
-					learningThetas[j] = learningThetas[j].subtract(averageDerivatives[j].multiply(alpha));
+					derivativeOfRregularizationTerm[j] = learningThetas[j].multiply(lambda/(m)).transform(MatrixFunctions.ClearColumn0);
+					averageDerivatives[j] = averageDerivatives[j].add( derivativeOfRregularizationTerm[j]);
 				}
 			}
 
+			//verify gradient, run this before update learningThetas, disable it before real training
+			// verifyGradient(lambda, m, X, Y, learningThetas, averageDerivatives);
+
+			for (int j = 0; j< learningThetas.length ; j ++)
+			{
+				learningThetas[j] = learningThetas[j].subtract(averageDerivatives[j].multiply(alpha));
+			}
 
 			
 			// Calculate cost and print, not necessary for final product.
@@ -141,24 +140,18 @@ public class MainComplete
 			}
 
 		}
-//		double J = calculateCost(learningThetas, m, X, Y, lambda);
-//		System.out.println("Step = " + o + " J= " + J);
-//		
-//		predict( learningThetas, X, y_);
-		
-		
-		// System.out.println(MathFunctions.sigmoidDerivative(MatrixUtil.initialDiagonalMatrix(15,
-		// -100)));
-//		theta1result = theta1;
-//		theta2result = theta2;
-		
+
 		//showSamples(xMatrix);
 	}
 
+	
+	/**
+	 * Verify the gradient with numeric approximated gradient
+	 */
 	protected static void verifyGradient(double lambda, int m, Matrix X, Matrix Y, Matrix[] learningThetas, Matrix[] averageDerivatives)
 	{
 		double epsilon = 0.0001;
-		// We randomly pick one theta from first layer to test the gradient
+		// We randomly pick one theta to test the gradient
 
 		int randomTheta = (int)(Math.random() * learningThetas.length);
 		int randomRow = (int)(Math.random() * learningThetas[randomTheta].rows());
@@ -218,9 +211,6 @@ public class MainComplete
 	 */
 	protected static void predict(Matrix[] learningThetas, Matrix X, BasicVector y )
 	{
-		// System.out.println("Result -----------------------------");
-
-		// 
 		Matrix predict = MathFunctions.sigmoid(learningThetas[0].multiply(X.transpose())); //output layer
 		for (int i = 1; i< learningThetas.length; i++)
 		{
@@ -305,6 +295,7 @@ public class MainComplete
 	}
 
 	/**
+	 * Training with one sample
 	 * Be careful with the index number here
 	 * Assume following structure (four layers L = 4)
 	 * input layer (layer 1) -> layer 2 -> layer 3 -> output layer (layer 4	)
@@ -352,9 +343,6 @@ public class MainComplete
 			// Based on our index this is 
 			// theta 2 T* dev 3 .* g'z2
 			// which is theta[i], dev[i], z[i-1]
-//			System.out.println("-----------" + i);
-//			System.out.println("=========" + thetas[i].rows() + "/" + thetas[i].columns());
-//			System.out.println("=========" + delta[i].length());
 			Vector tempDelta;
 			if (i == thetas.length-1)
 			{
@@ -367,7 +355,7 @@ public class MainComplete
 			}
 			delta[i-1] = thetas[i].transpose().multiply(tempDelta)
 					.hadamardProduct(MatrixFunctions.addBias(MathFunctions.sigmoidDerivative(zs[i-1])));
-			//System.out.println("-----------" + i);
+
 			// 4 Finally get the derivative, remove bias
 			derivative[i-1] = delta[i -1].sliceRight(1).toColumnMatrix().multiply(as[i -1].toRowMatrix());
 		}
@@ -377,6 +365,9 @@ public class MainComplete
 
 	}
 
+	/**
+	 * Forward propagation of NN
+	 */
 	protected static void forwardPropagation(Matrix[] thetas, Vector[] zs, Vector[] as)
 	{
 		for (int i =0;i <thetas.length ;i++)
@@ -393,6 +384,11 @@ public class MainComplete
 		}
 	}
 
+	/**
+	 * Some demo code
+	 * @param xMatrix
+	 * @throws InterruptedException
+	 */
 	protected static void showSamples(Basic2DMatrix xMatrix ) throws InterruptedException
 	{
 		// define your data
@@ -454,13 +450,6 @@ public class MainComplete
 			Thread.sleep(50);
 			f.repaint();
 		}
-		
-		
-		
-		
-		
-		
-		
 		
 
 	}
