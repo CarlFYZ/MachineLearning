@@ -22,6 +22,7 @@ public class LinearRegression
 	}
 
 	
+	
 	/**
 	 * Learn the parameter of linear regression by gradient descent
 	 * @param steps number of steps to run the training
