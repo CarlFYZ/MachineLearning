@@ -51,6 +51,7 @@ public class Main {
 
 		// X with 1 as first column
 		Matrix  X = MatrixFunctions.concatenate(MatrixFunctions.createVector(m, 1), xMatrix, true);
+		// Increase the dimension, has features like x1*x1, x2*x2, x1*x2, x2*x1
 		X = MatrixFunctions.concatenate( X, X.getColumn(1).hadamardProduct(X.getColumn(1)).divide(1), true);
 		X = MatrixFunctions.concatenate( X, X.getColumn(2).hadamardProduct(X.getColumn(2)).divide(1), true);
 		X = MatrixFunctions.concatenate( X, X.getColumn(1).hadamardProduct(X.getColumn(2)).divide(1), true);
@@ -84,7 +85,7 @@ public class Main {
 				{
 					return 1;
 				}
-				else if (a == b)
+				else if (Math.abs(a - b) < 0.2 )
 				{
 					return 0;
 				}
@@ -105,12 +106,15 @@ public class Main {
 		plot.addScatterPlot("my plot", Color.blue, ((Basic2DMatrix)zeros).toArray());
 		
 		
+		// Plot the decision boundary in a hard way
+		// Prepare the area to print, create all dots in this area
 		double[][] sampleSpace = MatrixFunctions.create2DArray(new double[][]{{-.5,-.5},{1,1}},0.05);
 		sampleSpace = MatrixFunctions.create2DArray(-.5, -.5,1,1,0.05);
 		Matrix samples = new Basic2DMatrix(	sampleSpace);
 		
 		Vector ones2 = MatrixFunctions.createVector(samples.rows(), 1);
 		Matrix sampleX = MatrixFunctions.concatenate(ones2, samples , true);
+		// Increase the dimension 
 		sampleX = MatrixFunctions.concatenate( sampleX, sampleX.getColumn(1).hadamardProduct(sampleX.getColumn(1)).divide(1), true);
 		sampleX = MatrixFunctions.concatenate( sampleX, sampleX.getColumn(2).hadamardProduct(sampleX.getColumn(2)).divide(1), true);
 		sampleX = MatrixFunctions.concatenate( sampleX, sampleX.getColumn(1).hadamardProduct(sampleX.getColumn(2)).divide(1), true);
@@ -118,13 +122,24 @@ public class Main {
 		
 		Vector sampleY = sampleX.multiply(theta);
 
-		Matrix sampleOnes = MatrixFunctions.select(samples, sampleY, cp, 0, 1, false);
+//		Matrix sampleOnes = MatrixFunctions.select(samples, sampleY, cp, 0, 1, false);
+//		Matrix sampleZeros = MatrixFunctions.select(samples, sampleY, cp, 0, -1, false);
+//		plot.addScatterPlot("my plot", Color.BLACK, ((Basic2DMatrix)sampleOnes).toArray());
+//		plot.addScatterPlot("my plot", Color.GREEN, ((Basic2DMatrix)sampleZeros).toArray());
 
-		Matrix sampleZeros = MatrixFunctions.select(samples, sampleY, cp, 0, -1, false);
 		
-		plot.addScatterPlot("my plot", Color.BLACK, ((Basic2DMatrix)sampleOnes).toArray());
+		Matrix sampleEquals = MatrixFunctions.select(samples, sampleY, cp, 0, 0, false);
 		
-		plot.addScatterPlot("my plot", Color.GREEN, ((Basic2DMatrix)sampleZeros).toArray());
+		
+		try
+		{
+			plot.addLinePlot("my plot", Color.MAGENTA, ((Basic2DMatrix)sampleEquals).toArray());
+		}
+		catch (Exception e)
+		{
+			System.out.println("Not enough points to plot a line");
+		}
+		
 
 		// put the PlotPanel in a JFrame, as a JPanel
 		JFrame frame = new JFrame("a plot panel");

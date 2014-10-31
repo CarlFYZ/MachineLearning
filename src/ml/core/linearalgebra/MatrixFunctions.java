@@ -231,6 +231,14 @@ public class MatrixFunctions
 		}
 	}
 	
+	/**
+	 * Select row i from the Matrix a, if element i of b matches the value 
+	 * @param a
+	 * @param b
+	 * @param value
+	 * @param isHorizontal
+	 * @return
+	 */
 	public static Matrix select(Matrix a, Vector b, double value, boolean isHorizontal)
 	{
 		Matrix result = null;

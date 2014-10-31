@@ -97,7 +97,7 @@ public class NeuralNetwork
 	 * @param learningThetas
 	 * @return
 	 */
-	public static Matrix[] gradientDescent(int steps, int costCalculationInterval, boolean verifyGradient, double alpha, double lambda, int m, Matrix X, BasicVector y_, Matrix Y,
+	public static Matrix[] gradientDescent(int steps, int costCalculationInterval, boolean verifyGradient, double alpha, double lambda, int m, Matrix X, Vector y_, Matrix Y,
 			Matrix[] learningThetas)
 	{
 		for (int o = 1; o <= steps ; o++)
@@ -167,7 +167,7 @@ public class NeuralNetwork
 	 * @param y
 	 * @param learningThetas
 	 */
-	public static void predict(Matrix[] learningThetas, Matrix X, BasicVector y )
+	public static void predict(Matrix[] learningThetas, Matrix X, Vector y )
 	{
 		Matrix predict = MathFunctions.sigmoid(learningThetas[0].multiply(X.transpose())); //output layer
 		for (int i = 1; i< learningThetas.length; i++)
@@ -181,24 +181,39 @@ public class NeuralNetwork
 		
 		//System.out.println(predict.rows() + " " + predict.columns());
 		int correctCount = 0;
-		for(int n=0;n<5000;n++)
+		for(int n=0;n<X.rows();n++)
 		{
 			Vector onePredict = predict.getColumn(n);
 			int highest =0;
-			for (int p=1;p<10;p++)
+			if (onePredict.length() > 1)
 			{
-				if(onePredict.get(highest) < onePredict.get(p))
+			
+				for (int p = 1; p < 10; p++)
 				{
-					highest = p;
+					if (onePredict.get(highest) < onePredict.get(p))
+					{
+						highest = p;
+					}
+
 				}
-				
-			}
-			if (highest==y.get(n)-1)
+				if (highest == y.get(n) - 1)
+				{
+					correctCount++;
+				}
+			} 
+			else
 			{
-				correctCount++;
+				highest = (int) (Math.round(onePredict.get(0)));
+				// System.out.println("===========" + highest + y.get(n) );
+				if (highest == y.get(n))
+				{
+					correctCount++;
+				}
 			}
+
+
 		}
-		System.out.println(correctCount);
+		System.out.println("Correct count = " +correctCount + "/" + X.rows() + "   " + (  correctCount * 100 / X.rows() ) + "%");
 	}
 
 	/**
