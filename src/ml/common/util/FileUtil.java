@@ -14,6 +14,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.la4j.matrix.Matrix;
+import org.la4j.vector.Vector;
+
 public class FileUtil {
 	
 	/**
@@ -153,6 +156,38 @@ public class FileUtil {
 				{
 					//System.out.println();
 				}
+
+			}
+			out.flush();
+			out.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public static void writeFile(File fileName, Matrix matrix) {
+		try {
+			
+			// if file doesnt exists, then create it
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(fileName), "UTF8"));
+
+			for (int i = 0; i < matrix.rows(); i++)
+			{
+				Vector row = matrix.getRow(i); 
+
+					for (int j = 0; j < row.length(); j++)
+					{
+						String delimiter = ",";
+						if (j == row.length() - 1)
+						{
+							delimiter = "\n";
+						}
+						out.write(row.get(j) + delimiter);
+					}
+
 
 			}
 			out.flush();

@@ -154,7 +154,7 @@ public class NeuralNetwork
 			{
 				double J = cost(learningThetas, m, X, Y, lambda);
 				System.out.println("Step = " + o + " J= " + J);
-				predict( learningThetas, X, y_);
+				predict( learningThetas, X, y_, false);
 			}
 	
 		}
@@ -167,7 +167,7 @@ public class NeuralNetwork
 	 * @param y
 	 * @param learningThetas
 	 */
-	public static void predict(Matrix[] learningThetas, Matrix X, Vector y )
+	public static void predict(Matrix[] learningThetas, Matrix X, Vector y, boolean isVerbose )
 	{
 		Matrix predict = MathFunctions.sigmoid(learningThetas[0].multiply(X.transpose())); //output layer
 		for (int i = 1; i< learningThetas.length; i++)
@@ -177,7 +177,11 @@ public class NeuralNetwork
 			predict = MathFunctions.sigmoid(learningThetas[i].multiply(MatrixFunctions.addBias(predict, false)));
 		}
 		
-		//System.out.println(predict);
+		if (isVerbose)
+		{
+			System.out.println(predict.getRow(0));
+			System.out.println(y);
+		}
 		
 		//System.out.println(predict.rows() + " " + predict.columns());
 		int correctCount = 0;
