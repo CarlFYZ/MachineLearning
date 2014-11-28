@@ -12,9 +12,6 @@ import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.vector.Vector;
 
-import com.jmatio.io.MatFileReader;
-import com.jmatio.io.MatFileWriter;
-
 
 public class Demo2
 {
@@ -29,20 +26,20 @@ public class Demo2
 				Matrices.asSymbolSeparatedSource(new FileInputStream(
 						"./data/20141025weekV5.csv")));
 		
-		int steps = 100000;
-		int costCalculationInterval = 100;
+		int steps = 500000;
+		int costCalculationInterval = 500;
 		
 		boolean verifyGradient = false;
 		// model parameters
-		double alpha = 0.05;
+		double alpha = 128;
 		// if lambda >= 0, then parameter regularization is used
-		double lambda = 1;
+		double lambda = 5;
 		
 		
 		// theta1 and theta2 to train
-		Matrix theta1 = MatrixFunctions.createRandomMatrix(40, 20, Math.sqrt(6.0 / (20 + 19)));
-		Matrix theta2 = MatrixFunctions.createRandomMatrix(10, 41, Math.sqrt(6.0 / (10 + 41)));
-		Matrix theta3 = MatrixFunctions.createRandomMatrix(1, 11, Math.sqrt(6.0 / (1 + 11)));
+		Matrix theta1 = MatrixFunctions.createRandomMatrix(31, 20, Math.sqrt(10.0 / (31 + 20)));
+		Matrix theta2 = MatrixFunctions.createRandomMatrix(5, 32, Math.sqrt(10.0 / (5 + 32)));
+		Matrix theta3 = MatrixFunctions.createRandomMatrix(1, 6, Math.sqrt(10.0 / (1 + 6)));
 		
 //		theta1 = new Basic2DMatrix(Matrices.asSymbolSeparatedSource(new FileInputStream("./data/Demo2Theta1")));
 //		theta2 = new Basic2DMatrix(Matrices.asSymbolSeparatedSource(new FileInputStream("./data/Demo2Theta2")));
@@ -51,23 +48,37 @@ public class Demo2
 //		Matrix theta4 = MatrixFunctions.createRandomMatrix(2, 4, Math.sqrt(6.0 / (2 + 4)));
 //		Matrix theta5 = MatrixFunctions.createRandomMatrix(1, 3, Math.sqrt(6.0 / (1 + 3)));
 
+		int totalSamples = matrix.rows();
+		int endTraining = totalSamples * 9/10;
+		int endCrossValidation =  endTraining + totalSamples * 1 /10;
+		int nbTest = totalSamples;
+		
+		// Prepare a tempMatrix for training, cross validation, test
+		// Remove y_
+		Matrix tempMatrix = matrix.slice(0, 0, matrix.rows(), matrix.columns()-1);
+		// Add bias to all
+		tempMatrix = MatrixFunctions.concatenate(MatrixFunctions.createVector(tempMatrix.rows(), 1), tempMatrix, true);
 		
 		// X
-		Matrix xMatrix = matrix.slice(0, 0, matrix.rows(), matrix.columns()-1);
-		// should be m * 20
+		Matrix X = tempMatrix.slice(0, 0, endTraining, tempMatrix.columns());
 		
-		System.out.println(xMatrix.rows());
-		System.out.println(xMatrix.columns());
-
+		// CV
+		Matrix cvMatrix = tempMatrix.slice(endTraining, 0, endCrossValidation, tempMatrix.columns());
+		
+		// Test
+		Matrix testMatrix = tempMatrix.slice(endCrossValidation, 0, totalSamples, tempMatrix.columns());
+		
+		System.out.println(X.rows());
+		System.out.println(X.columns());
 
 		// number of samples
-		int m = xMatrix.rows();
+		int m = X.rows();
 
-		// X with 1 as first column
-		Matrix X = MatrixFunctions.concatenate(MatrixFunctions.createVector(m, 1), xMatrix, true);
+
+
 
 		// y Vector and Y matrix(10 * 5000)
-		Vector y_ = matrix.getColumn(19);
+		Vector y_ = matrix.getColumn(19).slice(0, endTraining);
 		// System.out.println(y);
 
 //		double[][] Ys = new double[1][m];
@@ -90,12 +101,18 @@ public class Demo2
 		learningThetas = NeuralNetwork.gradientDescent(steps, costCalculationInterval, verifyGradient, alpha, lambda, m, X, y_, Y, learningThetas);
 		
 		
-		NeuralNetwork.predict(learningThetas, X, y_, true);
+		NeuralNetwork.predict(learningThetas, X, y_, false);
 		for (int i = 0; i<learningThetas.length; i++ )
 		{
-			System.out.println("theta" + (i+1) + " = \n" +  learningThetas[i]);
+			//System.out.println("theta" + (i+1) + " = \n" +  learningThetas[i]);
 			FileUtil.writeFile(new File("./data/Demo2theta" + (i+1)), learningThetas[i]);
 		}
+		
+		///////////////////////////////////////////////////////////////
+		//                   Start Cross Validation                  // 
+		///////////////////////////////////////////////////////////////
+		System.out.println("===========================");
+		NeuralNetwork.predict(learningThetas, cvMatrix, matrix.getColumn(19).slice(endTraining, endCrossValidation), false);
 		
 		
 	}

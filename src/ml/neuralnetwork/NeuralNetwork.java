@@ -100,11 +100,17 @@ public class NeuralNetwork
 	public static Matrix[] gradientDescent(int steps, int costCalculationInterval, boolean verifyGradient, double alpha, double lambda, int m, Matrix X, Vector y_, Matrix Y,
 			Matrix[] learningThetas)
 	{
+		long currentTimeMillis =  System.currentTimeMillis();;
+		double J = 1000000000;
+		Matrix averageDerivatives[] = new Matrix[learningThetas.length];
+		Matrix derivativeOfRregularizationTerm[] = new Matrix [learningThetas.length];
+		
 		for (int o = 1; o <= steps ; o++)
 		{
 			// We need to cumulative the derivatives over all the samples and then average
 			// Here we initial all them to zeros
-			Matrix averageDerivatives[] = new Matrix[learningThetas.length];
+//			System.out.println(System.currentTimeMillis() - currentTimeMillis);
+//			currentTimeMillis = System.currentTimeMillis();
 			for (int i = 0; i< learningThetas.length ; i ++)
 			{
 				averageDerivatives[i] =  MatrixFunctions.createMatrix(learningThetas[i].rows(), learningThetas[i].columns(), 0);
@@ -127,7 +133,7 @@ public class NeuralNetwork
 	
 			
 			// Calculate regularized derivative (if configured) and apply it to the learningThetas
-			Matrix derivativeOfRregularizationTerm[] = new Matrix [learningThetas.length];
+		
 			if (lambda >0)
 			{
 				for (int j = 0; j< learningThetas.length ; j ++)
@@ -152,8 +158,19 @@ public class NeuralNetwork
 			// Calculate cost and print, not necessary for final product.
 			if ( o %costCalculationInterval == 0)
 			{
-				double J = cost(learningThetas, m, X, Y, lambda);
-				System.out.println("Step = " + o + " J= " + J);
+				
+				double newJ = cost(learningThetas, m, X, Y, lambda);
+				// Self adjusted alpha
+				if ( J < newJ && alpha > 0.01)
+				{
+					alpha = alpha /2;
+				}
+				else
+				{
+					alpha = alpha * 1.1;
+				}
+				J = newJ;
+				System.out.println("Step = " + o + " J= " + J + " alpha = " + alpha);
 				predict( learningThetas, X, y_, false);
 			}
 	
@@ -212,6 +229,11 @@ public class NeuralNetwork
 				if (highest == y.get(n))
 				{
 					correctCount++;
+					if (highest == 1)
+					{
+						System.out.println("???????" + onePredict.get(0));
+					}
+						
 				}
 			}
 

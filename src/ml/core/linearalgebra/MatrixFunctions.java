@@ -1,6 +1,7 @@
 package ml.core.linearalgebra;
 
 import java.util.Comparator;
+import java.util.HashMap;
 
 import org.la4j.LinearAlgebra;
 import org.la4j.inversion.MatrixInverter;
@@ -12,6 +13,8 @@ import org.la4j.vector.dense.BasicVector;
 
 public class MatrixFunctions 
 {
+	
+	static HashMap<String, Basic2DMatrix> arrayCache = new HashMap<String, Basic2DMatrix>();
 	
 	/**
 	 * Inverse a vector using Gauss Jordan method
@@ -127,20 +130,29 @@ public class MatrixFunctions
 	
 	public static Basic2DMatrix createMatrix(int rows, int cols, double value)
 	{
-		double [][] matrix2d= new double[rows][cols];
-		if (value != 0)
-		{
-			for (int i =0; i<rows; i++)
-			{
-				for (int j= 0; j<cols; j++)
-				{
-					matrix2d[i][j] = value;
-				}
-			}
-				
-		}
+		Basic2DMatrix matrix = null;
+		String key = rows + "-" + cols + "-" + value;
+		matrix = arrayCache.get(key);
 		
-		return new Basic2DMatrix(matrix2d);
+		if (matrix == null)
+		{
+
+			double [][] matrix2d = new double[rows][cols];
+			if (value != 0)
+			{
+				for (int i = 0; i < rows; i++)
+				{
+					for (int j = 0; j < cols; j++)
+					{
+						matrix2d[i][j] = value;
+					}
+				}
+
+			}
+			matrix =  new Basic2DMatrix(matrix2d);
+			arrayCache.put(key, matrix);
+		}
+		return matrix;
 	}
 	
 	public static Basic2DMatrix createDiagonalMatrix(int size, double value)
@@ -186,11 +198,19 @@ public class MatrixFunctions
 	
 	public static Vector addBias(Vector vector) 
 	{
-			Matrix matrix = vector.toColumnMatrix();
-			// add 1 to the fist column
-			Matrix result = MatrixFunctions.concatenate(MatrixFunctions.createVector(1, 1).toRowMatrix(), matrix, false);
+		Vector newVector = new BasicVector(vector.length() + 1);
+		newVector.set(0, 1);
+		for (int i = 1; i< newVector.length(); i++)
+		{
+			newVector.set(i, vector.get(i-1));
+		}
+		return newVector;
+		
+//			Matrix matrix = vector.toColumnMatrix();
+//			// add 1 to the fist column
+//			Matrix result = MatrixFunctions.concatenate(MatrixFunctions.createVector(1, 1).toRowMatrix(), matrix, false);
 
-			return result.toColumnVector();
+//			return result.toColumnVector();
 
 	}
 
