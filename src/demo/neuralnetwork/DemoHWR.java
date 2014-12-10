@@ -20,7 +20,7 @@ import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
 
 
-public class Main
+public class DemoHWR
 {
 	
 	public static Basic2DMatrix theta1result;
@@ -31,13 +31,13 @@ public class Main
 		MatFileReader matfilereader = new MatFileReader("./data/ex4weights.mat");
 		
 		int steps = 1000;
-		int costCalculationInterval = 5;
+		int costCalculationInterval = 1;
 		
-		boolean verifyGradient = false;
+		boolean verifyGradient = true;
 		// model parameters
-		double alpha = 0.05;
+		double alpha = 0.005;
 		// if lambda >= 0, then parameter regularization is used
-		double lambda = 0;
+		double lambda = 1;
 		
 		
 		// theta1 and theta2 to train

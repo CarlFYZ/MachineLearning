@@ -160,16 +160,6 @@ public class NeuralNetwork
 			{
 				
 				double newJ = cost(learningThetas, m, X, Y, lambda);
-				// Self adjusted alpha
-				if ( J < newJ && alpha > 0.01)
-				{
-					alpha = alpha /2;
-				}
-				else
-				{
-					alpha = alpha * 1.1;
-				}
-				J = newJ;
 				System.out.println("Step = " + o + " J= " + J + " alpha = " + alpha);
 				predict( learningThetas, X, y_, false);
 			}

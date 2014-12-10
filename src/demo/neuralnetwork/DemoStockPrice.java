@@ -13,7 +13,7 @@ import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.vector.Vector;
 
 
-public class Demo2
+public class DemoStockPrice
 {
 	
 	public static Basic2DMatrix theta1result;

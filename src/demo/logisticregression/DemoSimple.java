@@ -20,7 +20,7 @@ import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 
 
-public class Main {
+public class DemoSimple {
 
 	public static void main(String args[]) throws Exception {
 		

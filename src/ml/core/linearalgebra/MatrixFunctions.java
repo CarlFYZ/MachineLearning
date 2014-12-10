@@ -205,12 +205,6 @@ public class MatrixFunctions
 			newVector.set(i, vector.get(i-1));
 		}
 		return newVector;
-		
-//			Matrix matrix = vector.toColumnMatrix();
-//			// add 1 to the fist column
-//			Matrix result = MatrixFunctions.concatenate(MatrixFunctions.createVector(1, 1).toRowMatrix(), matrix, false);
-
-//			return result.toColumnVector();
 
 	}
 
