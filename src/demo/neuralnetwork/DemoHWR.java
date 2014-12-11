@@ -33,9 +33,9 @@ public class DemoHWR
 		int steps = 1000;
 		int costCalculationInterval = 1;
 		
-		boolean verifyGradient = true;
+		boolean verifyGradient = false;
 		// model parameters
-		double alpha = 0.005;
+		double alpha = 0.05;
 		// if lambda >= 0, then parameter regularization is used
 		double lambda = 1;
 		
@@ -48,14 +48,9 @@ public class DemoHWR
 		System.out.println("theta1:" + theta1ml);
 		System.out.println("theta2:" + theta2ml);
 
-		theta1 = MatrixFunctions.createRandomMatrix(25, 401, Math.sqrt(60.0 / (25 + 401)) );
-		theta2 = MatrixFunctions.createRandomMatrix(15, 26, Math.sqrt(60.0 / (15 + 26)));
-		Matrix theta3 = MatrixFunctions.createRandomMatrix(10, 16, Math.sqrt(60.0 / (10 + 16)));
-		
-		System.out.println(theta1);
-		System.out.println(theta2);
-		System.out.println(theta3);
-		
+		//theta1 = MatrixFunctions.createRandomMatrix(25, 401, Math.sqrt(60.0 / (25 + 401)) );
+		//theta2 = MatrixFunctions.createRandomMatrix(10, 26, Math.sqrt(60.0 / (10 + 26)));
+
 		MatFileReader matfilereader2 = new MatFileReader("./data/ex4data1.mat");
 		MLDouble Xml = (MLDouble) matfilereader2.getMLArray("X");
 
@@ -83,7 +78,7 @@ public class DemoHWR
 		Matrix Y = new Basic2DMatrix(Ys);
 		
 		// The thetas to learn, it starts from the original input and changes every iteration
-		Matrix[] learningThetas = new Matrix[] {theta1, theta2, theta3};
+		Matrix[] learningThetas = new Matrix[] {theta1, theta2};
 
 
 		///////////////////////////////////////////////////////////////

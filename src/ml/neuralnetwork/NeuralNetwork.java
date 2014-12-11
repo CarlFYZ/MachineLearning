@@ -159,7 +159,7 @@ public class NeuralNetwork
 			if ( o %costCalculationInterval == 0)
 			{
 				
-				double newJ = cost(learningThetas, m, X, Y, lambda);
+				J = cost(learningThetas, m, X, Y, lambda);
 				System.out.println("Step = " + o + " J= " + J + " alpha = " + alpha);
 				predict( learningThetas, X, y_, false);
 			}

@@ -1,8 +1,6 @@
 package ml.core.linearalgebra;
 
 import java.util.Comparator;
-import java.util.HashMap;
-
 import org.la4j.LinearAlgebra;
 import org.la4j.inversion.MatrixInverter;
 import org.la4j.matrix.Matrix;
@@ -13,8 +11,6 @@ import org.la4j.vector.dense.BasicVector;
 
 public class MatrixFunctions 
 {
-	
-	static HashMap<String, Basic2DMatrix> arrayCache = new HashMap<String, Basic2DMatrix>();
 	
 	/**
 	 * Inverse a vector using Gauss Jordan method
@@ -130,29 +126,20 @@ public class MatrixFunctions
 	
 	public static Basic2DMatrix createMatrix(int rows, int cols, double value)
 	{
-		Basic2DMatrix matrix = null;
-		String key = rows + "-" + cols + "-" + value;
-		matrix = arrayCache.get(key);
-		
-		if (matrix == null)
+		double [][] matrix2d= new double[rows][cols];
+		if (value != 0)
 		{
-
-			double [][] matrix2d = new double[rows][cols];
-			if (value != 0)
+			for (int i =0; i<rows; i++)
 			{
-				for (int i = 0; i < rows; i++)
+				for (int j= 0; j<cols; j++)
 				{
-					for (int j = 0; j < cols; j++)
-					{
-						matrix2d[i][j] = value;
-					}
+					matrix2d[i][j] = value;
 				}
-
 			}
-			matrix =  new Basic2DMatrix(matrix2d);
-			arrayCache.put(key, matrix);
+				
 		}
-		return matrix;
+		
+		return new Basic2DMatrix(matrix2d);
 	}
 	
 	public static Basic2DMatrix createDiagonalMatrix(int size, double value)
