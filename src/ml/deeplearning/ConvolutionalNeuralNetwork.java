@@ -5,6 +5,7 @@ import ml.core.linearalgebra.Tensor;
 import ml.core.math.MathFunctions;
 
 import org.la4j.matrix.Matrix;
+import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 
@@ -100,12 +101,14 @@ public class ConvolutionalNeuralNetwork
 	 * @return
 	 */
 	public static Matrix[] gradientDescent(int steps, int costCalculationInterval, boolean verifyGradient, double alpha, double lambda, int m, Matrix X, Vector y_, Matrix Y,
-			Matrix[] learningThetas, Tensor[] learningFilters)
+			Matrix[] learningThetas, Tensor[][] learningFilters)
 	{
 		long currentTimeMillis =  System.currentTimeMillis();;
 		double J = 1000000000;
 		Matrix averageDerivatives[] = new Matrix[learningThetas.length];
 		Matrix derivativeOfRregularizationTerm[] = new Matrix [learningThetas.length];
+		
+		Tensor averageFilterDerivatives[][]= new Tensor[learningFilters.length][learningFilters[0].length];
 		
 		for (int o = 1; o <= steps ; o++)
 		{
@@ -117,12 +120,37 @@ public class ConvolutionalNeuralNetwork
 			{
 				averageDerivatives[i] =  MatrixFunctions.createMatrix(learningThetas[i].rows(), learningThetas[i].columns(), 0);
 			}
-	
+
+			// Deeplearning: create 20 * (5*5*3) for derivatives of first filters, then 10 * (5*5*20) ,then ... 
+			for (int h = 0; h < learningFilters.length; h++)
+			{
+				for (int i = 0; i < learningFilters[0].length; i++) 
+				{
+					for (int j = 0; j < learningFilters[h][i].filters(); j++)
+					{
+						averageFilterDerivatives[h][i] = new Tensor(learningFilters[h][i].rows(), learningThetas[i].columns(), 0);
+					}
+				}
+			}
+			// Deeplearning:
+			
 			// Here we calculate the derivatives from all samples
 			for (int i = 0; i < m; i++)
 			{
+				// Deeplearning: the input X is in  gray scale, copy it 3 times to make 3 levels: R,G,B
+				// So we can test Tensor input
+				Vector oneInputX = X.getRow(i);
+				Matrix xMatrix1 = MatrixFunctions.vectorToMatrix(oneInputX,true);
+				Matrix xMatrix2 = MatrixFunctions.vectorToMatrix(oneInputX,true);	
+				Matrix xMatrix3 = MatrixFunctions.vectorToMatrix(oneInputX,true);
+				Tensor x_t = new Tensor(xMatrix1, xMatrix2, xMatrix3);
+				
+				
+				
+				
 				// This is the core part of NN, processing one sample 
-				Matrix[] result = processOneSample(learningThetas,X.getRow(i), Y.getColumn(i));
+
+				Matrix[] result = processOneSample(learningThetas, learningFilters, x_t, oneInputX, Y.getColumn(i), averageFilterDerivatives);
 	
 				// average derivative
 				for (int j = 0; j< learningThetas.length ; j ++)
@@ -239,16 +267,24 @@ public class ConvolutionalNeuralNetwork
 	 * Be careful with the index number here
 	 * Assume following structure (four layers L = 4)
 	 * input layer (layer 1) -> layer 2 -> layer 3 -> output layer (layer 4	)
-	 *              z1, a1,   theta1
+	 *              z1, a1, theta1
 	 * we use _ to denote a vector (column vector)
 	 * @param thetas [t1, t2, t3 ...] thetas[0] corresponds to theta1, with is from layer 1 to layer 2.
 	 * @param x_ the input with bias
+	 * @param Need an input without bias, for filters
 	 * @param y_ the known result
 	 * @return the thetas we learn from one sample in one iteration
 	 */
-	public static Matrix[] processOneSample(Matrix[] thetas, Vector x_, Vector y_)
+	public static Matrix[] processOneSample(Matrix[] thetas, Tensor[][] filters, Tensor x_t, Vector x_, Vector y_, Tensor[][] learningTensorDerivatives)
 	{
-		// zs are the waited input of each layer
+	
+		
+		
+		//Tensor[] zs = new Tensor[] 
+		
+		
+		
+		// zs are the weighted input of each layer
 		// So it starts with z2, which is zs[0]
 		// [z2, z3, z4 ...]
 		Vector[] zs = new Vector[thetas.length];
@@ -258,6 +294,9 @@ public class ConvolutionalNeuralNetwork
 		// [a1, a2 ,a3 ...]
 		Vector[] as = new Vector[thetas.length + 1];
 		as[0] = x_;
+		
+		
+		
 		
 		// Forward propagation
 		

@@ -83,13 +83,12 @@ public class DemoHWR
 		}
 		Matrix Y = new Basic2DMatrix(Ys);
 		
-		// Filters
-
-		Tensor[] filters = new Tensor[20];
+		// Deeplearning: Filters
+		Tensor[] learningFilters = new Tensor[20];
 		for (int i = 0; i<20; i++)
 		{
 			Tensor filter = new Tensor(5,5,3);
-			filters[i] = filter;
+			learningFilters[i] = filter;
 		}
 		
 		
@@ -100,9 +99,9 @@ public class DemoHWR
 		///////////////////////////////////////////////////////////////
 		//                   Start training                          // 
 		///////////////////////////////////////////////////////////////
-		learningThetas = ConvolutionalNeuralNetwork.gradientDescent(steps, costCalculationInterval, verifyGradient, alpha, lambda, m, X, y_, Y, learningThetas, filters);
+		learningThetas = ConvolutionalNeuralNetwork.gradientDescent(steps, costCalculationInterval, verifyGradient, alpha, lambda, m, X, y_, Y, learningThetas, learningFilters);
 
-		//showSamples(xMatrix);
+		showSamples(xMatrix);
 	}
 
 

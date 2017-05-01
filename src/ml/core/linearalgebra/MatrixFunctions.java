@@ -142,6 +142,7 @@ public class MatrixFunctions
 		return new Basic2DMatrix(matrix2d);
 	}
 	
+	
 	public static Basic2DMatrix createDiagonalMatrix(int size, double value)
 	{
 		double [][] matrix2d= new double[size][size];
@@ -206,6 +207,35 @@ public class MatrixFunctions
 			return concatenate(a.toRowMatrix(), b, isHorizontal); 
 		}
 		
+	}
+	
+	/**
+	 * Assuming square matrix
+	 * @param a
+	 * @param isHorizontal
+	 * @return
+	 */
+	public static Matrix vectorToMatrix(Vector a, boolean isHorizontal )
+	{
+		int size = (int) Math.sqrt(a.length());
+
+		double[][] z2d = new double[size][size];
+
+		for (int i = 0; i < size; i++)
+		{
+			for (int j = 0; j < size; j++)
+			{
+				if (isHorizontal)
+				{
+					z2d[j][i] = a.get((j * 20) + i);
+				} else
+				{
+					z2d[i][j] = a.get((j * 20) + i);
+				}
+			}
+		}
+
+		return new Basic2DMatrix(z2d);
 	}
 	
 	public static Matrix concatenate(Vector a, Vector b, boolean isHorizontal  )
@@ -378,6 +408,7 @@ public class MatrixFunctions
 		@Override
 		public double evaluate(int arg0, int arg1, double arg2)
 		{
+			// Remove first column??
 			if (arg1 ==0)
 			{
 				return 0;
