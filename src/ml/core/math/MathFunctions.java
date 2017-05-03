@@ -11,7 +11,6 @@ public class MathFunctions {
 	{
 		v = v.transform(new VectorFunction()
 		{
-			@Override
 			public double evaluate(int arg0, double value)
 			{
 				return Math.log(value);
@@ -27,7 +26,6 @@ public class MathFunctions {
 		v = v.transform(new MatrixFunction()
 		{
 			
-			@Override
 			public double evaluate(int arg0, int arg1, double arg2)
 			{
 				// TODO Auto-generated method stub
@@ -54,7 +52,7 @@ public class MathFunctions {
 		Vector result = X.multiply(theta);
 		result = result.transform(new VectorFunction()
 		{
-			@Override
+
 			public double evaluate(int arg0, double value)
 			{
 				return sigmoid(value);
@@ -69,7 +67,7 @@ public class MathFunctions {
 	{
 		return X.transform(new MatrixFunction() {
 			
-			@Override
+
 			public double evaluate(int arg0, int arg1, double arg2) 
 			{
 				return sigmoid(arg2);
@@ -82,7 +80,7 @@ public class MathFunctions {
 		return x.transform(new VectorFunction() 
 		{
 			
-			@Override
+
 			public double evaluate(int arg0, double value)
 			{
 				return sigmoid(value);
@@ -95,7 +93,7 @@ public class MathFunctions {
 	{
 		return X.transform(new VectorFunction() {
 			
-			@Override
+
 			public double evaluate(int arg0, double value)
 			{
 				double g = sigmoid(value);
@@ -108,7 +106,7 @@ public class MathFunctions {
 	{
 		return X.transform(new MatrixFunction() {
 			
-			@Override
+
 			public double evaluate(int arg0, int arg1, double arg2) 
 			{
 				double g = sigmoid(arg2);
