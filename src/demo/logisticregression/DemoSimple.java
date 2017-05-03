@@ -1,11 +1,6 @@
 package demo.logisticregression;
 
 
-import ml.core.linearalgebra.MatrixFunctions;
-import ml.logesticregression.LogisticRegression;
-
-import org.math.plot.*;
-
 import java.awt.Color;
 import java.io.FileInputStream;
 import java.util.Comparator;
@@ -18,6 +13,10 @@ import org.la4j.matrix.dense.Basic2DMatrix;
 import org.la4j.matrix.functor.MatrixFunction;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
+import org.math.plot.Plot2DPanel;
+
+import ml.core.linearalgebra.MatrixFunctions;
+import ml.logesticregression.LogisticRegression;
 
 
 public class DemoSimple {
@@ -36,12 +35,26 @@ public class DemoSimple {
 		Matrix xMatrix = matrix.resizeColumns(2);
 		xMatrix = xMatrix.transform(new MatrixFunction() {
 			
-			@Override
+			// @Override
 			public double evaluate(int arg0, int arg1, double value) {
 				// TODO Auto-generated method stub
 				return (value -50)/70;
 			}
 		});
+
+		Matrix ones = MatrixFunctions.select(xMatrix.resizeColumns(2), matrix.getColumn(2), 1, false);
+
+		Matrix zeros = MatrixFunctions.select(xMatrix.resizeColumns(2), matrix.getColumn(2), 0, false);
+		Plot2DPanel plot = new Plot2DPanel();
+		plot.addScatterPlot("my plot", Color.RED, ((Basic2DMatrix) ones).toArray());
+
+		plot.addScatterPlot("my plot", Color.blue, ((Basic2DMatrix) zeros).toArray());
+
+		JFrame frame = new JFrame("a plot panel");
+		frame.setSize(600, 600);
+		frame.setContentPane(plot);
+		frame.setVisible(true);
+
 		// m: number of samples
 		int m = xMatrix.rows();
 		
@@ -75,10 +88,10 @@ public class DemoSimple {
 		// System.out.println(sigmoid(new BasicVector(new double[] {0,0}), matrix.resizeColumns(2)));
 		
 		// add a line plot to the PlotPanel
-		Plot2DPanel plot = new Plot2DPanel();
+
 		//plot.addScatterPlot("my plot", ((Basic2DMatrix)matrix.resizeColumns(2)).toArray());
 		Comparator<Double> cp = new Comparator<Double>(){
-			@Override
+			// @Override
 			public int compare(Double a, Double b)
 			{
 				if (a > b)
@@ -97,19 +110,12 @@ public class DemoSimple {
 		};
 		
 		
-		Matrix ones = MatrixFunctions.select(xMatrix.resizeColumns(2), matrix.getColumn(2), 1, false);
-		
-		Matrix zeros = MatrixFunctions.select(xMatrix.resizeColumns(2), matrix.getColumn(2), 0, false);
-		
-		plot.addScatterPlot("my plot", Color.RED, ((Basic2DMatrix)ones).toArray());
-		
-		plot.addScatterPlot("my plot", Color.blue, ((Basic2DMatrix)zeros).toArray());
-		
+
 		
 		// Plot the decision boundary in a hard way
 		// Prepare the area to print, create all dots in this area
-		double[][] sampleSpace = MatrixFunctions.create2DArray(new double[][]{{-.5,-.5},{1,1}},0.05);
-		sampleSpace = MatrixFunctions.create2DArray(-.5, -.5,1,1,0.05);
+		double[][] sampleSpace = MatrixFunctions.create2DArray(new double[][] { { -.3, -.3 }, { 0.7, 0.7 } }, 0.05);
+		sampleSpace = MatrixFunctions.create2DArray(-.3, -.3, .7, .7, 0.05);
 		Matrix samples = new Basic2DMatrix(	sampleSpace);
 		
 		Vector ones2 = MatrixFunctions.createVector(samples.rows(), 1);
@@ -131,6 +137,10 @@ public class DemoSimple {
 		Matrix sampleEquals = MatrixFunctions.select(samples, sampleY, cp, 0, 0, false);
 		
 		
+		// put the PlotPanel in a JFrame, as a JPanel
+
+
+		Thread.sleep(8000);
 		try
 		{
 			plot.addLinePlot("my plot", Color.MAGENTA, ((Basic2DMatrix)sampleEquals).toArray());
@@ -139,13 +149,7 @@ public class DemoSimple {
 		{
 			System.out.println("Not enough points to plot a line");
 		}
-		
-
-		// put the PlotPanel in a JFrame, as a JPanel
-		JFrame frame = new JFrame("a plot panel");
-		frame.setSize(600, 600);
-		frame.setContentPane(plot);
-		frame.setVisible(true);
+		frame.repaint();
 
 	}
 
