@@ -1,6 +1,7 @@
 package ml.core.linearalgebra;
 
 import java.util.Comparator;
+
 import org.la4j.LinearAlgebra;
 import org.la4j.inversion.MatrixInverter;
 import org.la4j.matrix.Matrix;
@@ -405,7 +406,6 @@ public class MatrixFunctions
 	public static MatrixFunction ClearColumn0 = new MatrixFunction()
 	{
 		
-		@Override
 		public double evaluate(int arg0, int arg1, double arg2)
 		{
 			// Remove first column??

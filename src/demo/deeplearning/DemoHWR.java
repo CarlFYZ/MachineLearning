@@ -7,15 +7,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-import ml.core.linearalgebra.MatrixFunctions;
-import ml.core.linearalgebra.Tensor;
-import ml.core.math.MathFunctions;
-import ml.deeplearning.ConvolutionalNeuralNetwork;
-import ml.neuralnetwork.NeuralNetwork;
-
 import org.la4j.matrix.Matrix;
 import org.la4j.matrix.dense.Basic2DMatrix;
-import org.la4j.matrix.dense.DenseMatrix;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 
@@ -24,6 +17,10 @@ import com.jmatio.types.MLDouble;
 
 import demo.neuralnetwork.MainFrame;
 import demo.neuralnetwork.PaintPanel;
+import ml.core.linearalgebra.MatrixFunctions;
+import ml.core.linearalgebra.Tensor;
+import ml.core.math.MathFunctions;
+import ml.deeplearning.ConvolutionalNeuralNetwork;
 
 
 public class DemoHWR
@@ -31,6 +28,18 @@ public class DemoHWR
 	
 	public static Basic2DMatrix theta1result;
 	public static  Basic2DMatrix theta2result;
+	
+	
+	
+	/**
+	 * 
+	 * Color * Width * Height 3 * 20 * 20
+	 * 
+	 * 
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -54,8 +63,8 @@ public class DemoHWR
 		System.out.println("theta1:" + theta1ml);
 		System.out.println("theta2:" + theta2ml);
 
-		//theta1 = MatrixFunctions.createRandomMatrix(25, 401, Math.sqrt(60.0 / (25 + 401)) );
-		//theta2 = MatrixFunctions.createRandomMatrix(10, 26, Math.sqrt(60.0 / (10 + 26)));
+		theta1 = MatrixFunctions.createRandomMatrix(25, 91, Math.sqrt(60.0 / (25 + 91)));
+		theta2 = MatrixFunctions.createRandomMatrix(10, 26, Math.sqrt(60.0 / (10 + 26)));
 
 		MatFileReader matfilereader2 = new MatFileReader("./data/ex4data1.mat");
 		MLDouble Xml = (MLDouble) matfilereader2.getMLArray("X");
@@ -83,15 +92,23 @@ public class DemoHWR
 		}
 		Matrix Y = new Basic2DMatrix(Ys);
 		
-		// Deeplearning: Filters
-		Tensor[] learningFilters = new Tensor[20];
-		for (int i = 0; i<20; i++)
+		// Deeplearning: Layer 1: 20 Filters
+		Tensor[][] learningFilters = new Tensor[2][];
+
+		learningFilters[0] = new Tensor[20];
+		for (int i = 0; i < learningFilters[0].length; i++)
 		{
-			Tensor filter = new Tensor(5,5,3);
-			learningFilters[i] = filter;
+
+			learningFilters[0][i] = new Tensor(5, 5, 3);
 		}
 		
 		
+		learningFilters[1] = new Tensor[10];
+		for (int i = 0; i < learningFilters[1].length; i++)
+		{
+			learningFilters[1][i] = new Tensor(3, 3, 20);
+		}
+
 		// The thetas to learn, it starts from the original input and changes every iteration
 		Matrix[] learningThetas = new Matrix[] {theta1, theta2};
 

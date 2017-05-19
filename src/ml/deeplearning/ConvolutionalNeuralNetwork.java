@@ -1,13 +1,11 @@
 package ml.deeplearning;
 
+import org.la4j.matrix.Matrix;
+import org.la4j.vector.Vector;
+
 import ml.core.linearalgebra.MatrixFunctions;
 import ml.core.linearalgebra.Tensor;
 import ml.core.math.MathFunctions;
-
-import org.la4j.matrix.Matrix;
-import org.la4j.matrix.dense.Basic2DMatrix;
-import org.la4j.vector.Vector;
-import org.la4j.vector.dense.BasicVector;
 
 public class ConvolutionalNeuralNetwork
 {
@@ -103,7 +101,7 @@ public class ConvolutionalNeuralNetwork
 	public static Matrix[] gradientDescent(int steps, int costCalculationInterval, boolean verifyGradient, double alpha, double lambda, int m, Matrix X, Vector y_, Matrix Y,
 			Matrix[] learningThetas, Tensor[][] learningFilters)
 	{
-		long currentTimeMillis =  System.currentTimeMillis();;
+		long currentTimeMillis = System.currentTimeMillis();
 		double J = 1000000000;
 		Matrix averageDerivatives[] = new Matrix[learningThetas.length];
 		Matrix derivativeOfRregularizationTerm[] = new Matrix [learningThetas.length];
@@ -132,11 +130,14 @@ public class ConvolutionalNeuralNetwork
 					}
 				}
 			}
+
 			// Deeplearning:
 			
 			// Here we calculate the derivatives from all samples
 			for (int i = 0; i < m; i++)
 			{
+				// processing one sample
+
 				// Deeplearning: the input X is in  gray scale, copy it 3 times to make 3 levels: R,G,B
 				// So we can test Tensor input
 				Vector oneInputX = X.getRow(i);
@@ -148,7 +149,8 @@ public class ConvolutionalNeuralNetwork
 				
 				
 				
-				// This is the core part of NN, processing one sample 
+
+				// This is the fully connected NN,
 
 				Matrix[] result = processOneSample(learningThetas, learningFilters, x_t, oneInputX, Y.getColumn(i), averageFilterDerivatives);
 	
@@ -278,11 +280,6 @@ public class ConvolutionalNeuralNetwork
 	public static Matrix[] processOneSample(Matrix[] thetas, Tensor[][] filters, Tensor x_t, Vector x_, Vector y_, Tensor[][] learningTensorDerivatives)
 	{
 	
-		
-		
-		//Tensor[] zs = new Tensor[] 
-		
-		
 		
 		// zs are the weighted input of each layer
 		// So it starts with z2, which is zs[0]

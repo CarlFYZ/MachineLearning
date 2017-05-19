@@ -8,6 +8,7 @@ public class Tensor
 	
 	Matrix[] tensor = null;
 	
+	double bias = 1;
 	
 	public Tensor(Matrix... tensor)
 	{
@@ -35,8 +36,6 @@ public class Tensor
 		}
 	}
 
-	
-	
 	public int filters()
 	{
 		return tensor.length;
@@ -52,6 +51,7 @@ public class Tensor
 		return tensor[0].columns();
 	}
 	
+
 	/**
 	 * Get 2D filter by index.
 	 * e.g. 5*5
@@ -60,4 +60,18 @@ public class Tensor
 	{
 		return tensor[filterIndex];
 	}
+
+	/**
+	 * Get the bias
+	 */
+	public double getBias()
+	{
+		return bias;
+	}
+
+	public void setBias(double bias)
+	{
+		this.bias = bias;
+	}
+
 }
